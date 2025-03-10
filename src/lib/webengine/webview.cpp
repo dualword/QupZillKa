@@ -783,10 +783,14 @@ void WebView::createPageContextMenu(QMenu* menu)
 void WebView::createLinkContextMenu(QMenu* menu, const WebHitTestResult &hitTest)
 {
     menu->addSeparator();
-    Action* act = new Action(IconProvider::newTabIcon(), tr("Open link in new &tab"));
+    Action* act = new Action(IconProvider::newTabIcon(), tr("Open link in background &tab"));
     act->setData(hitTest.linkUrl());
     connect(act, SIGNAL(triggered()), this, SLOT(userDefinedOpenUrlInNewTab()));
     connect(act, SIGNAL(ctrlTriggered()), this, SLOT(userDefinedOpenUrlInBgTab()));
+    menu->addAction(act);
+    act = new Action(IconProvider::newTabIcon(), tr("Open link in new tab"));
+    act->setData(hitTest.linkUrl());
+    connect(act, SIGNAL(triggered()), this, SLOT(openUrlInSelectedTab()));
     menu->addAction(act);
     menu->addAction(IconProvider::newWindowIcon(), tr("Open link in new &window"), this, SLOT(openUrlInNewWindow()))->setData(hitTest.linkUrl());
     menu->addAction(IconProvider::privateBrowsingIcon(), tr("Open link in &private window"), mApp, SLOT(startPrivateBrowsing()))->setData(hitTest.linkUrl());

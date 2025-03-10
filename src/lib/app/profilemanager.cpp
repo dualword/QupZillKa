@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -24,12 +25,12 @@
 
 #include <QDir>
 #include <QSqlDatabase>
+#include <QSqlError>
 #include <QMessageBox>
 #include <QSettings>
 #include <iostream>
 
 ProfileManager::ProfileManager()
-    : m_databaseConnected(false)
 {
 }
 
@@ -59,10 +60,6 @@ void ProfileManager::initConfigDir()
     dir.cd(QLatin1String("default"));
 
     // $Config/profiles/default
-    QFile(dir.filePath(QLatin1String("browsedata.db"))).remove();
-    QFile(QLatin1String(":data/browsedata.db")).copy(dir.filePath(QLatin1String("browsedata.db")));
-    QFile(dir.filePath(QLatin1String("browsedata.db"))).setPermissions(QFile::ReadUser | QFile::WriteUser);
-
     QFile(QLatin1String(":data/bookmarks.json")).copy(dir.filePath(QLatin1String("bookmarks.json")));
     QFile(dir.filePath(QLatin1String("bookmarks.json"))).setPermissions(QFile::ReadUser | QFile::WriteUser);
 
@@ -101,8 +98,6 @@ int ProfileManager::createProfile(const QString &profileName)
     }
 
     dir.cd(profileName);
-    QFile(QLatin1String(":data/browsedata.db")).copy(dir.filePath(QLatin1String("browsedata.db")));
-    QFile(dir.filePath(QLatin1String("browsedata.db"))).setPermissions(QFile::ReadUser | QFile::WriteUser);
 
     QFile versionFile(dir.filePath(QLatin1String("version")));
     versionFile.open(QFile::WriteOnly);
@@ -249,29 +244,26 @@ void ProfileManager::copyDataToProfile()
                              "backed up in following file:<br/><br/><b>" + browseDataBackup + "<br/></b>";
         QMessageBox::warning(0, "QupZilla: Incompatible profile version", text);
     }
-
-    QFile(QLatin1String(":data/browsedata.db")).copy(profileDir.filePath(QLatin1String("browsedata.db")));
-    QFile(profileDir.filePath(QLatin1String("browsedata.db"))).setPermissions(QFile::ReadUser | QFile::WriteUser);
 }
 
 void ProfileManager::connectDatabase()
 {
     const QString dbFile = DataPaths::currentProfilePath() + QLatin1String("/browsedata.db");
 
-    // Reconnect
-    if (m_databaseConnected) {
-        QSqlDatabase::removeDatabase(QSqlDatabase::database().connectionName());
-    }
-
     QSqlDatabase db = QSqlDatabase::addDatabase(QLatin1String("QSQLITE"));
     db.setDatabaseName(dbFile);
-
-    if (!QFile::exists(dbFile)) {
-        qWarning("Cannot find SQLite database file! Copying and using the defaults!");
-
-        QFile(":data/browsedata.db").copy(dbFile);
-        QFile(dbFile).setPermissions(QFile::ReadUser | QFile::WriteUser);
-        db.setDatabaseName(dbFile);
+    if(!db.open()){
+        qCritical() << "Error:" << db.lastError().text();
+    } else {
+        if(db.tables().empty()) {
+            auto list = QzTools::readAllFileContents(QSL(":/data/browsedata.sql")).split(";", Qt::SkipEmptyParts);
+            for(const auto& sql : list){
+               if(sql.trimmed().length() <= 0) continue;
+               QSqlQuery query;
+               if (!query.exec(sql))
+                   qCritical() << "Error:" << query.lastError().text();
+            }
+        }
     }
 
     if (mApp->isPrivate()) {
@@ -284,5 +276,4 @@ void ProfileManager::connectDatabase()
 
     SqlDatabase::instance()->setDatabase(db);
 
-    m_databaseConnected = true;
 }
