@@ -14,7 +14,7 @@ Plugins:
 License: GNU General Public License (Version 3)  
 Source code: https://github.com/dualword/QupZillKa/  
 
-<table width="100%" border="1" cellpadding="1" cellspacing="1">
+<table style="width:100%" border="1" cellpadding="1" cellspacing="1">
 <tr>
     <td align='center'><img src="rss.png" height="100" width="150" alt="RSS Reader" title="RSS Reader"/></td>
 </tr>
