@@ -288,7 +288,6 @@ MainApplication::MainApplication(int &argc, char** argv)
     m_networkManager = new NetworkManager(this);
     m_history = new History(this);
     m_userAgentManager = new UserAgentManager(this);
-    m_rssManager = new RSSManager(getWindow());
 
     setupUserScripts();
 
@@ -568,6 +567,14 @@ ClosedWindowsManager* MainApplication::closedWindowsManager()
     return m_closedWindowsManager;
 }
 
+RSSManager* MainApplication::rssManager()
+{
+    if (!m_rssManager) {
+        m_rssManager = new RSSManager(getWindow());
+    }
+    return m_rssManager;
+}
+
 HTML5PermissionsManager* MainApplication::html5PermissionsManager()
 {
     if (!m_html5PermissionsManager) {
@@ -666,6 +673,7 @@ void MainApplication::quitApplication()
     }
 
     m_plugins->shutdown();
+    delete m_rssManager;
 
     for (BrowserWindow *window : qAsConst(m_windows)) {
         emit window->aboutToClose();

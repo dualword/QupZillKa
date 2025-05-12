@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - WebKit based browser
 * Copyright (C) 2010-2014  David Rosca <nowrep@gmail.com>
@@ -19,12 +20,19 @@
 
 #include <QNetworkAccessManager>
 
-FollowRedirectReply::FollowRedirectReply(const QUrl &url, QNetworkAccessManager* manager)
-    : QObject()
+FollowRedirectReply::FollowRedirectReply(const QUrl &url, QNetworkAccessManager* manager,
+    QList<QPair<QString, QString>> list) : QObject()
     , m_manager(manager)
     , m_redirectCount(0)
 {
-    m_reply = m_manager->get(QNetworkRequest(url));
+
+    QNetworkRequest req(url);
+    if(list.size() > 0){
+        for(const auto& pair : list ){
+            req.setRawHeader(pair.first.toStdString().c_str(), pair.second.toStdString().c_str());
+        }
+    }
+    m_reply = m_manager->get(req);
     connect(m_reply, SIGNAL(finished()), this, SLOT(replyFinished()));
 }
 
@@ -61,18 +69,18 @@ QByteArray FollowRedirectReply::readAll()
 void FollowRedirectReply::replyFinished()
 {
     int replyStatus = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    m_status = replyStatus;
+    m_lm = m_reply->rawHeader("Last-Modified");
 
     if ((replyStatus != 301 && replyStatus != 302) || m_redirectCount == 5) {
         emit finished();
         return;
     }
-
     m_redirectCount++;
 
     QUrl redirectUrl = m_reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
     m_reply->close();
     m_reply->deleteLater();
-
     m_reply = m_manager->get(QNetworkRequest(redirectUrl));
     connect(m_reply, SIGNAL(finished()), this, SLOT(replyFinished()));
 }

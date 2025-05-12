@@ -874,10 +874,15 @@ void WebView::createSelectedTextContextMenu(QMenu* menu, const WebHitTestResult 
         connect(act, SIGNAL(ctrlTriggered()), this, SLOT(userDefinedOpenUrlInNewTab()));
         menu->addAction(act);
 
-        Action* act1 = new Action(QIcon::fromTheme("document-open-remote"), tr("Open web address in new tab"));
-        act1->setData(guessedUrl);
-        connect(act1, SIGNAL(triggered()), this, SLOT(openUrlInSelectedTab()));
-        menu->addAction(act1);
+        act = new Action(QIcon::fromTheme("document-open-remote"), tr("Open web address in background tab"));
+        act->setData(guessedUrl);
+        connect(act, SIGNAL(triggered()), this, SLOT(userDefinedOpenUrlInNewTab()));
+        menu->addAction(act);
+
+        act = new Action(QIcon::fromTheme("document-open-remote"), tr("Open web address in new tab"));
+        act->setData(guessedUrl);
+        connect(act, SIGNAL(triggered()), this, SLOT(openUrlInSelectedTab()));
+        menu->addAction(act);
     }
 
     menu->addSeparator();

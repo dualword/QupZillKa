@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - WebKit based browser
 * Copyright (C) 2010-2014  David Rosca <nowrep@gmail.com>
@@ -32,7 +33,8 @@ class QUPZILLA_EXPORT FollowRedirectReply : public QObject
 {
     Q_OBJECT
 public:
-    explicit FollowRedirectReply(const QUrl &url, QNetworkAccessManager* manager);
+    explicit FollowRedirectReply(const QUrl &url, QNetworkAccessManager* manager,
+                                 QList<QPair<QString, QString>> = QList<QPair<QString, QString>>());
     ~FollowRedirectReply();
 
     QNetworkReply* reply() const;
@@ -41,7 +43,8 @@ public:
 
     QNetworkReply::NetworkError error() const;
     QString errorString() const;
-
+    int status() {return m_status;};
+    QString lm() {return m_lm;};
     QByteArray readAll();
 
 signals:
@@ -53,7 +56,8 @@ private slots:
 private:
     QNetworkAccessManager* m_manager;
     QNetworkReply* m_reply;
-    int m_redirectCount;
+    int m_redirectCount, m_status;
+    QString m_lm;
 
 };
 

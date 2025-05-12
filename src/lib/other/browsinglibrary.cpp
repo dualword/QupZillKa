@@ -58,7 +58,7 @@ BrowsingLibrary::BrowsingLibrary(BrowserWindow* window, QWidget* parent)
 
     ui->tabs->AddTab(m_historyManager, historyIcon, tr("History"));
     ui->tabs->AddTab(m_bookmarksManager, bookmarksIcon, tr("Bookmarks"));
-    //ui->tabs->AddTab(m_rssManager, QIcon(":/icons/other/feed.png"), tr("RSS"));
+    ui->tabs->AddTab(m_rssManager, QIcon(":/icons/other/feed.png"), tr("RSS"));
     ui->tabs->SetMode(FancyTabWidget::Mode_LargeSidebar);
     ui->tabs->setFocus();
 
@@ -69,6 +69,12 @@ BrowsingLibrary::BrowsingLibrary(BrowserWindow* window, QWidget* parent)
 
     connect(ui->tabs, &FancyTabWidget::CurrentChanged, ui->searchLine, &QLineEdit::clear);
     connect(ui->searchLine, SIGNAL(textChanged(QString)), this, SLOT(search()));
+    connect(ui->tabs, QOverload<int>::of(&FancyTabWidget::CurrentChanged), [=](int i){
+        ui->searchLine->setVisible(true);
+        ui->importExport->setVisible(false);
+        if(i==1) ui->importExport->setVisible(true);
+        if(i==2) ui->searchLine->setVisible(false);
+    });
 
     QzTools::setWmClass("Browsing Library", this);
 }
@@ -122,7 +128,7 @@ void BrowsingLibrary::showRSS(BrowserWindow* window)
     m_rssManager->setMainWindow(window);
 
     if (!m_rssLoaded) {
-        m_rssManager->refreshTable();
+        m_rssManager->refreshTree();
         m_rssLoaded = true;
     }
 

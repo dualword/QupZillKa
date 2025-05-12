@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - WebKit based browser
 * Copyright (C) 2010-2014  David Rosca <nowrep@gmail.com>
@@ -15,52 +16,413 @@
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 * ============================================================ */
+
 #include "rssmanager.h"
 #include "ui_rssmanager.h"
 #include "browserwindow.h"
-#include "tabwidget.h"
-#include "mainapplication.h"
+#include "statusbar.h"
 #include "treewidget.h"
 #include "iconprovider.h"
 #include "browsinglibrary.h"
 #include "qztools.h"
-#include "followredirectreply.h"
-#include "networkmanager.h"
-#include "qzsettings.h"
 
 #include <QMenu>
 #include <QLabel>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-//#include <QWebSettings>
 #include <QMessageBox>
-#include <QNetworkReply>
 #include <QBuffer>
 #include <QSqlQuery>
+#include <QToolBar>
+#include <QWebEngineSettings>
+#include <QWebEngineHistory>
+#include <QClipboard>
 
-RSSManager::RSSManager(BrowserWindow* window, QWidget* parent)
-    : QWidget(parent)
+RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
     , ui(new Ui::RSSManager)
     , m_window(window)
 {
     ui->setupUi(this);
+
 #ifdef Q_OS_MAC
     ui->tabWidget->setDocumentMode(false);
 #endif
-    ui->tabWidget->setElideMode(Qt::ElideRight);
+
     m_networkManager = mApp->networkManager();
+    ui->view1->setPage(new WPage(mApp->webProfile(), ui->view1));
+    ui->view1->settings()->setAttribute(QWebEngineSettings::AutoLoadImages, false);
+    ui->view1->settings()->setAttribute(QWebEngineSettings::JavascriptEnabled, false);
+    ui->view1->page()->action(QWebEnginePage::QWebEnginePage::Back)->setVisible(false);
+    ui->view1->page()->action(QWebEnginePage::QWebEnginePage::Back)->disconnect();
+    ui->view1->page()->action(QWebEnginePage::QWebEnginePage::Forward)->setVisible(false);
+    ui->view1->page()->action(QWebEnginePage::QWebEnginePage::Forward)->disconnect();
+    ui->view1->page()->action(QWebEnginePage::QWebEnginePage::Reload)->setVisible(false);
+    ui->view1->page()->action(QWebEnginePage::QWebEnginePage::Reload)->disconnect();
+    ui->view1->page()->action(QWebEnginePage::QWebEnginePage::ViewSource)->setVisible(false);
+    ui->view1->page()->action(QWebEnginePage::QWebEnginePage::ViewSource)->disconnect();
+    ui->view1->page()->action(QWebEnginePage::QWebEnginePage::OpenLinkInNewTab)->setVisible(false);
+    ui->view1->page()->action(QWebEnginePage::QWebEnginePage::OpenLinkInNewTab)->disconnect();
+    ui->view1->page()->action(QWebEnginePage::QWebEnginePage::OpenLinkInNewWindow)->setVisible(false);
+    ui->view1->page()->action(QWebEnginePage::QWebEnginePage::OpenLinkInNewWindow)->disconnect();
 
-    m_reloadButton = new QToolButton(this);
+    auto tb = new QToolBar(this);
+    QToolButton* btnAddFolder = new QToolButton(tb);
+    btnAddFolder->setAutoRaise(true);
+    btnAddFolder->setToolTip(tr("Add New Folder"));
+    btnAddFolder->setIcon(QApplication::style()->standardIcon(QStyle::SP_DirIcon));
+    connect(btnAddFolder, SIGNAL(clicked()), this, SLOT(addFolder()));
+
+    m_reloadButton = new QToolButton(tb);
     m_reloadButton->setAutoRaise(true);
-    m_reloadButton->setToolTip(tr("Reload"));
-    m_reloadButton->setIcon(QIcon::fromTheme(QSL("view-refresh")));
-
-    ui->tabWidget->setCornerWidget(m_reloadButton);
-
+    m_reloadButton->setToolTip(tr("Update All Feeds"));
+    m_reloadButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_MediaPlay));
     connect(m_reloadButton, SIGNAL(clicked()), this, SLOT(reloadFeeds()));
-    connect(ui->add, SIGNAL(clicked()), this, SLOT(addFeed()));
-    connect(ui->deletebutton, SIGNAL(clicked()), this, SLOT(deleteFeed()));
-    connect(ui->edit, SIGNAL(clicked()), this, SLOT(editFeed()));
+
+    auto btn = new QToolButton(tb);
+    btn->setAutoRaise(true);
+    btn->setToolTip(tr("Delete All News"));
+    btn->setIcon(QApplication::style()->standardIcon(QStyle::SP_TrashIcon));
+    connect(btn, &QToolButton::clicked, [this] {
+        QMessageBox::StandardButton btn = QMessageBox::warning(this, tr("Confirmation"),
+            tr("Are you sure you want to delete all news?"), QMessageBox::Yes | QMessageBox::No);
+        if (btn != QMessageBox::Yes) return;
+        QSqlQuery query(db);
+        query.prepare("DELETE FROM item");
+        query.exec();
+        ui->tree1->itemClicked(ui->tree1->topLevelItem(0),0);
+
+    });
+
+    btnImage = new QToolButton(tb);
+    btnImage->setAutoRaise(true);
+    btnImage->setToolTip(tr("Autoload images"));
+    btnImage->setCheckable(true);
+    btnImage->setIcon(QApplication::style()->standardIcon(QStyle::SP_DesktopIcon));
+    connect(btnImage, &QToolButton::clicked, [this] {
+        ui->view1->settings()->setAttribute(QWebEngineSettings::AutoLoadImages, !ui->view1->settings()->testAttribute(QWebEngineSettings::AutoLoadImages));
+        btnImage->setChecked(ui->view1->settings()->testAttribute(QWebEngineSettings::AutoLoadImages));
+        ui->view1->history()->clear();
+        ui->view1->reload();
+    });
+
+    txt = new QLineEdit(this);
+    txt->setReadOnly(true);
+    txt->setAlignment(Qt::AlignHCenter);
+    txt->setFixedWidth(100);
+
+    tb->addWidget(btnAddFolder);
+    tb->addSeparator();
+    tb->addWidget(m_reloadButton);
+    tb->addSeparator();
+    tb->addWidget(btn);
+    tb->addSeparator();
+    tb->addWidget(btnImage);
+    tb->addSeparator();
+    tb->addWidget(txt);
+    layout()->setMenuBar(tb);
+
+    ui->tree1->setHeaderLabels({"Folders"});
+    ui->tree1->setContextMenuPolicy(Qt::CustomContextMenu);
+    ui->tree1->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    connect(ui->tree1, QOverload<const QPoint&>::of(&QTreeWidget::customContextMenuRequested),
+            [this](const QPoint& pos){
+        QMenu menu(this);
+        QTreeWidgetItem *item = ui->tree1->itemAt( pos );
+        QAction *newAct;
+
+        if(item == ui->tree1->topLevelItem(0)){
+            newAct = new QAction(tr("Add new folder"), this);
+            connect(newAct, SIGNAL(triggered()), this, SLOT(addFolder()));
+            menu.addAction(newAct);
+            newAct = new QAction(tr("Update All Feeds"), this);
+            connect(newAct, SIGNAL(triggered()), this, SLOT(reloadFeeds()));
+            menu.addAction(newAct);
+            menu.addSeparator();
+            newAct = new QAction(tr("Delete All News"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                QMessageBox::StandardButton btn = QMessageBox::warning(this, tr("Confirmation"),
+                    tr("Are you sure you want to delete all news?"), QMessageBox::Yes | QMessageBox::No);
+                if (btn != QMessageBox::Yes) return;
+                QSqlQuery query(db);
+                query.prepare("DELETE FROM item");
+                query.exec();
+                ui->tree1->itemClicked(ui->tree1->topLevelItem(0),0);
+
+            });
+            menu.addAction(newAct);
+        } else if(item->parent() == ui->tree1->topLevelItem(0)){
+            newAct = new QAction(tr("Add New RSS Feed"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                QUrl url = QUrl(QInputDialog::getText(this, tr("Add new feed"), tr("Please enter URL of new feed:")));
+                if (url.isEmpty() || !url.isValid()) return;
+
+                QSqlQuery query(db);
+                query.prepare("INSERT INTO feed (fid, url, active) VALUES(?,?,?)");
+                query.bindValue(0, item->data(0, rId));
+                query.bindValue(1, url);
+                query.bindValue(2, 1);
+                query.exec();
+
+                QTreeWidgetItem* tmp = new QTreeWidgetItem();
+                tmp->setText(0, url.toString());
+                tmp->setData(0, rId, query.lastInsertId().toInt());
+                tmp->setToolTip(0, url.toString());
+                tmp->setIcon(0,QIcon(QPixmap(":/icons/other/feed.png")));
+                item->addChild(tmp);
+                ui->tree1->itemClicked(tmp,0);
+
+            });
+
+            menu.addAction(newAct);
+            newAct = new QAction(tr("Update Feeds"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [=]{
+                reloadFeeds(item->data(0, rId).toInt());
+            });
+            menu.addAction(newAct);
+            menu.addSeparator();
+
+            newAct = new QAction(tr("Delete News in this Folder"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                QMessageBox::StandardButton btn = QMessageBox::warning(this, tr("Confirmation"),
+                    tr("Are you sure you want to delete news?"), QMessageBox::Yes | QMessageBox::No);
+                if (btn != QMessageBox::Yes) return;
+
+                QSqlQuery query(db);
+                query.prepare("DELETE FROM item WHERE fid in (select id from feed where fid=?)");
+                query.addBindValue(item->data(0, rId));
+                query.exec();
+                ui->tree1->itemClicked(item,0);
+            });
+            menu.addAction(newAct);
+
+            newAct = new QAction(tr("Delete Folder"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                QMessageBox::StandardButton btn = QMessageBox::warning(this, tr("Confirmation"),
+                    tr("Are you sure you want to delete folder?"), QMessageBox::Yes | QMessageBox::No);
+                if (btn != QMessageBox::Yes) return;
+
+                QSqlQuery query(db);
+                query.prepare("DELETE FROM folder WHERE id=?");
+                query.addBindValue(item->data(0, rId));
+                query.exec();
+                ui->tree1->itemClicked(item->parent(),0);
+                item->parent()->removeChild(item);
+                delete item;
+
+            });
+            menu.addAction(newAct);
+        } else {
+            newAct = new QAction(tr("Update Feed"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                beginToLoadSlot(QUrl(item->toolTip(0)));
+            });
+            menu.addAction(newAct);
+            menu.addSeparator();
+            newAct = new QAction(tr("Toggle Enable/Disable Updates"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [&](bool b){
+                bool tmp = !selectValue(db, "active", "feed", "id", item->data(0, rId)).toBool();
+                updateValue("feed", "active", tmp, "id", item->data(0, rId));
+                tmp ? item->setForeground(0, QBrush(Qt::black)) :item->setForeground(0, QBrush(Qt::gray));
+            });
+            menu.addAction(newAct);
+            menu.addSeparator();
+            newAct = new QAction(tr("Delete News"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                QMessageBox::StandardButton btn = QMessageBox::warning(this, tr("Confirmation"),
+                    tr("Are you sure you want to delete news?"), QMessageBox::Yes | QMessageBox::No);
+                if (btn != QMessageBox::Yes) return;
+
+                QSqlQuery query(db);
+                query.prepare("DELETE FROM item WHERE fid=?");
+                query.addBindValue(item->data(0, rId));
+                query.exec();
+                ui->tree1->itemClicked(item,0);
+            });
+            menu.addAction(newAct);
+
+            newAct = new QAction(tr("Delete Feed"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                QMessageBox::StandardButton btn = QMessageBox::warning(this, tr("Confirmation"),
+                    tr("Are you sure you want to delete feed?"), QMessageBox::Yes | QMessageBox::No);
+                if (btn != QMessageBox::Yes) return;
+
+                QSqlQuery query(db);
+                query.prepare("DELETE FROM feed WHERE id=?");
+                query.addBindValue(item->data(0, rId));
+                query.exec();
+                ui->tree1->itemClicked(item->parent(),0);
+                item->parent()->removeChild(item);
+                delete item;
+            });
+            menu.addAction(newAct);
+        }
+        menu.exec(QCursor::pos());
+
+    });
+    connect(ui->tree1, QOverload<QTreeWidgetItem*, int>::of(&QTreeWidget::itemClicked),
+            [this](QTreeWidgetItem *item, int col){
+        if(item == ui->tree1->topLevelItem(0)){
+            refreshTable();
+        } else if(item->parent() == ui->tree1->topLevelItem(0)){
+            refreshTable("SELECT id, title, url, pubdate, unread FROM item where fid in (select id from feed where fid=?)", item->data(0, rId).toInt());
+        } else {
+            refreshTable("SELECT id, title, url, pubdate, unread FROM item where fid=?", item->data(0, rId).toInt());
+        }
+        ui->tree1->setCurrentItem(item);
+    });
+
+    ui->table1->setHorizontalHeaderLabels({"Title", "Date"});
+    ui->table1->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->table1->setItemDelegateForColumn(1, new DtItem(ui->table1));
+    ui->table1->horizontalHeader()->setDefaultSectionSize(150);
+    ui->table1->verticalHeader()->hide();
+    connect(ui->table1, QOverload<const QPoint&>::of(&QTableWidget::customContextMenuRequested),
+            [this](const QPoint& pos){
+        QMenu menu(this);
+        QAction* newAct;
+        QUrl link = selectValue(db, "url","item","id",ui->table1->item(ui->table1->currentRow(), 0)->data(rId)).toUrl();
+        if (!link.isEmpty()){
+            menu.addAction(tr("Open link in new tab"), this, SLOT(loadFeedInNewTab()))->setData(link);
+            newAct = new QAction(tr("Copy link to clipboard"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                QClipboard *cb = QGuiApplication::clipboard();
+                cb->setText(link.toString());
+            });
+            menu.addAction(newAct);
+        }
+        newAct = new QAction(tr("Delete"), this);
+        connect(newAct, QOverload<bool>::of(&QAction::triggered), [this](bool b){
+            int row = 0;
+            const QList<QTableWidgetItem *> list = ui->table1->selectedItems();
+            row = list[0]->row();
+            for (auto it : list){
+                QSqlQuery query(db);
+                query.prepare("DELETE FROM item WHERE id=?");
+                query.addBindValue(ui->table1->item(it->row(), 0)->data(rId));
+                query.exec();
+                query.finish();
+            }
+            ui->tree1->itemClicked(ui->tree1->selectedItems()[0], 0);
+            row >= ui->table1->rowCount() ? ui->table1->selectRow(ui->table1->rowCount()-1) : ui->table1->selectRow(row);
+        });
+        menu.addSeparator();
+        menu.addAction(newAct);
+        menu.exec(QCursor::pos());
+    });
+    connect(ui->table1, QOverload<QTableWidgetItem*, QTableWidgetItem*>::of(&QTableWidget::currentItemChanged),
+            [this](QTableWidgetItem *item, QTableWidgetItem* item2){
+        ui->view1->setHtml("<html><body></body></html>", QUrl("http://_blank"));
+        ui->view1->history()->clear();
+        if (item == nullptr) return;
+        QUrl link = selectValue(db, "url","item","id",ui->table1->item(ui->table1->currentRow(), 0)->data(rId)).toUrl();
+        QSqlQuery query(db);
+        query.prepare("SELECT text, enc_url, enc_type, enc_length, title, m_url, m_type, m_thurl  FROM item WHERE id=?");
+        query.addBindValue(ui->table1->item(ui->table1->currentRow(), 0)->data(rId));
+        query.exec();
+        QString txt;
+        if (query.next()){
+            if (query.value(1).toString().length() > 0){
+                txt.append("<a href='").append(query.value(1).toString()).append("'>Enclosure ");
+                if (query.value(2).isValid() || query.value(3).isValid()){
+                    txt.append("(").append(query.value(2).toString()).append(" ");
+                    txt.append(QLocale().formattedDataSize(query.value(3).toInt())).append(")");
+                }
+                txt.append("</a>");
+            }
+            if (query.value(5).toString().length() > 0){
+                txt.append("&nbsp;<a href='").append(query.value(5).toString()).append("'>Media ");
+                if (query.value(6).toString().length() > 0){
+                    txt.append("(").append(query.value(6).toString()).append(")");
+                }
+                txt.append("</a>");
+            }
+            if (query.value(7).toString().length() > 0){
+                txt.append("&nbsp;<a href='").append(query.value(7).toString()).append("'>Thumbnail");
+                txt.append("</a>");
+            }
+            txt.append("<br/><hr></br/>");
+        }
+        txt.append(query.value(4).toString());
+        txt.append("<br/><hr></br/>");
+        txt.append(query.value(0).toString());
+        query.finish();
+        ui->view1->setEnabled(false);
+        ui->view1->setHtml(txt, QUrl("http://_blank"));
+        ui->view1->setEnabled(true);
+        updateValue("item", "unread", 0, "id", ui->table1->item(ui->table1->currentRow(), 0)->data(rId));
+        QFont font;
+        font.setBold(false);
+        ui->table1->item(ui->table1->currentRow(), 0)->setFont(font);
+        m_window->statusBar()->showMessage(link.toString(), 2000);
+
+    });
+    connect(ui->table1, QOverload<QTableWidgetItem*>::of(&QTableWidget::itemDoubleClicked),
+            [this](QTableWidgetItem *item){
+        QUrl link = selectValue(db, "url","item","id",ui->table1->item(ui->table1->currentRow(), 0)->data(rId)).toUrl();
+        ui->view1->setHtml("<html><body></body></html>", QUrl("http://_blank"));
+        ui->view1->history()->clear();
+        QSqlQuery query(db);
+        query.prepare("SELECT text, enc_url, enc_type, enc_length, title, m_url, m_type, m_thurl FROM item WHERE id=?");
+        query.addBindValue(ui->table1->item(ui->table1->currentRow(), 0)->data(rId));
+        query.exec();
+        QString txt;
+        if (query.next()){
+            if (query.value(1).toString().length() > 0){
+                txt.append("<a href='").append(query.value(1).toString()).append("'>Enclosure ");
+                if (query.value(2).isValid() || query.value(3).isValid()){
+                    txt.append("(").append(query.value(2).toString()).append(" ");
+                    txt.append(QLocale().formattedDataSize(query.value(3).toInt())).append(")");
+                }
+                txt.append("</a>");
+            }
+            if (query.value(5).toString().length() > 0){
+                txt.append("&nbsp;<a href='").append(query.value(5).toString()).append("'>Media ");
+                if (query.value(6).toString().length() > 0){
+                    txt.append("(").append(query.value(6).toString()).append(")");
+                }
+                txt.append("</a>");
+            }
+            if (query.value(7).toString().length() > 0){
+                txt.append("&nbsp;<a href='").append(query.value(7).toString()).append("'>Thumbnail");
+                txt.append("</a>");
+            }
+            txt.append("<br/><hr></br/>");
+        }
+        txt.append(query.value(4).toString());
+        txt.append("<br/><hr></br/>");
+        txt.append(query.value(0).toString());
+        query.finish();
+        ui->view1->setHtml(txt, QUrl("http://_blank"));
+        updateValue("item", "unread", 0, "id", ui->table1->item(ui->table1->currentRow(), 0)->data(rId));
+        QFont font;
+        font.setBold(false);
+        ui->table1->item(ui->table1->currentRow(), 0)->setFont(font);
+        getQupZilla()->tabWidget()->addView(link, qzSettings->newTabPosition);
+    });
+    connect(ui->view1->page(), &QWebEnginePage::linkHovered, [this](const QString &url) {
+        if (url.isEmpty()) return;
+        m_window->statusBar()->showMessage(url, 3000);
+    });
+    db = QSqlDatabase::addDatabase("QSQLITE", "rss");
+    db.setDatabaseName(DataPaths::currentProfilePath() + QLatin1String("/rss.db"));
+    db.setConnectOptions("QSQLITE_BUSY_TIMEOUT=10000");
+    if(!db.open()){
+        qCritical() << "Error:" << db.lastError().text();
+    } else {
+        if(db.tables().empty()) {
+            auto list = QzTools::readAllFileContents(QSL(":/data/rss.sql")).split(";", Qt::SkipEmptyParts);
+            for(const auto& sql : list){
+               if(sql.trimmed().length() <= 0) continue;
+               QSqlQuery query(db);
+               if (!query.exec(sql))
+                   qCritical() << "Error:" << query.lastError().text();
+            }
+        }
+        QSqlQuery query(db);
+        query.exec("PRAGMA foreign_keys = ON");
+        query.exec("PRAGMA journal_mode=WAL");
+        query.finish();
+    }
 }
 
 BrowserWindow* RSSManager::getQupZilla()
@@ -71,15 +433,6 @@ BrowserWindow* RSSManager::getQupZilla()
     return m_window.data();
 }
 
-void RSSManager::deleteAllTabs()
-{
-    while (ui->tabWidget->count() > 0) {
-        QWidget* w = ui->tabWidget->widget(0);
-        ui->tabWidget->removeTab(0);
-        delete w;
-    }
-}
-
 void RSSManager::setMainWindow(BrowserWindow* window)
 {
     if (window) {
@@ -87,181 +440,169 @@ void RSSManager::setMainWindow(BrowserWindow* window)
     }
 }
 
-void RSSManager::refreshTable()
-{
-    QSqlQuery query;
-    ui->tabWidget->setUpdatesEnabled(false);
-    deleteAllTabs();
+void RSSManager::refreshTree() {
+    ui->tree1->clear();    
+    QTreeWidgetItem* root = new QTreeWidgetItem();
+    root->setText(0, "All");
+    ui->tree1->insertTopLevelItem(0, root);
 
-    query.exec("SELECT address, title, icon FROM rss");
+    QSqlQuery query(db);
+    query.exec("SELECT id, name FROM folder");
     int i = 0;
     while (query.next()) {
-        QUrl address = query.value(0).toUrl();
-        QString title = query.value(1).toString();
-        QIcon icon = QPixmap::fromImage(QImage::fromData(query.value(2).toByteArray()));
-        TreeWidget* tree = new TreeWidget();
-        tree->setHeaderLabel(tr("News"));
-        tree->setContextMenuPolicy(Qt::CustomContextMenu);
-        connect(tree, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
-
-        ui->tabWidget->addTab(tree, title);
-        ui->tabWidget->setTabToolTip(i, address.toString());
-        connect(tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)), this, SLOT(loadFeed(QTreeWidgetItem*)));
-        connect(tree, SIGNAL(itemMiddleButtonClicked(QTreeWidgetItem*)), this, SLOT(controlLoadFeed(QTreeWidgetItem*)));
-        connect(tree, SIGNAL(itemControlClicked(QTreeWidgetItem*)), this, SLOT(controlLoadFeed(QTreeWidgetItem*)));
+        int id = query.value(0).toUInt();
+        QString name = query.value(1).toString();
         QTreeWidgetItem* item = new QTreeWidgetItem();
-        item->setText(0, tr("Loading..."));
-        tree->addTopLevelItem(item);
+        item->setText(0, name);
+        item->setData(0, rId, QVariant(id));
+        root->addChild(item);
 
-        ui->tabWidget->setTabIcon(i, icon);
-        beginToLoadSlot(address);
-        i++;
-    }
-    if (i > 0) {
-        ui->deletebutton->setEnabled(true);
-        m_reloadButton->setEnabled(true);
-        ui->edit->setEnabled(true);
-    }
-    else {
-        ui->deletebutton->setEnabled(false);
-        m_reloadButton->setEnabled(false);
-        ui->edit->setEnabled(false);
+        QSqlQuery q(db);
+        q.prepare("SELECT id, title, url, icon, active FROM feed where fid=?");
+        q.bindValue(0, id);
+        q.exec();
+        while (q.next()) {
+            QTreeWidgetItem* it = new QTreeWidgetItem();
+            it->setData(0, rId, QVariant(q.value(0)));
+            it->setToolTip(0,q.value(2).toString());
+            q.value(4).toBool() ? it->setForeground(0, QBrush(Qt::black)) : it->setForeground(0, QBrush(Qt::gray));
+            q.value(1).isNull() ? it->setText(0,q.value(2).toString()) : it->setText(0,q.value(1).toString());
 
-        QFrame* frame = new QFrame();
-        frame->setObjectName("rssmanager-frame");
-        QVBoxLayout* verticalLayout = new QVBoxLayout(frame);
-        QLabel* label_2 = new QLabel(frame);
-        label_2->setPixmap(QPixmap(":/icons/menu/rss.png"));
-        label_2->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
-        verticalLayout->addWidget(label_2);
-        QLabel* label = new QLabel(frame);
-        label->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
-        label->setText(tr("You don't have any RSS Feeds.<br/>\nPlease add some with RSS icon in navigation bar on site which offers feeds."));
-        verticalLayout->addWidget(label);
-        ui->tabWidget->addTab(frame, tr("Empty"));
+            QPixmap pix = QPixmap();
+            pix.loadFromData( q.value(3).toByteArray() );
+            if(pix.isNull()) pix = QPixmap(":/icons/other/feed.png");
+            it->setIcon(0,QIcon(pix));
+            item->addChild(it);
+
+        }
+        q.finish();
     }
-    ui->tabWidget->setUpdatesEnabled(true);
+    query.finish();
+    ui->tree1->expandAll();
+    refreshTable();
+    root->setSelected(true);
+}
+
+void RSSManager::refreshTable()
+{
+    QSqlQuery query(db);
+    ui->table1->setRowCount(0);
+    ui->table1->setSortingEnabled(false);
+    query.exec("SELECT id, title, url, pubdate, unread FROM item");
+    QFont font;
+    font.setBold(true);
+    while (query.next()) {
+        int row = ui->table1->rowCount();
+        ui->table1->insertRow(row);
+
+        QTableWidgetItem *newItem = new QTableWidgetItem(query.value(1).toString());
+        ui->table1->setItem(row, 0, newItem);
+        newItem->setToolTip(query.value(1).toString());
+        newItem->setData(rId, query.value(0));
+        if(query.value(4).toBool()) newItem->setFont(font);
+
+        newItem = new QTableWidgetItem();
+        newItem->setData(Qt::DisplayRole, query.value(3));
+        ui->table1->setItem(row, 1, newItem);
+    }
+    ui->table1->setSortingEnabled(true);
+    ui->table1->sortItems(1, Qt::DescendingOrder);
+    ui->table1->selectRow(0);
+    txt->setText(QString::number(ui->table1->rowCount()));
+
+}
+
+void RSSManager::refreshTable(const QString& sql, int id)
+{
+    QSqlQuery query(db);
+    ui->table1->setRowCount(0);
+    ui->table1->setSortingEnabled(false);
+    query.prepare(sql);
+    query.bindValue(0, id);
+    query.exec();
+    QFont font;
+    font.setBold(true);
+
+    while (query.next()) {
+        int row = ui->table1->rowCount();
+        ui->table1->insertRow(row);
+        QTableWidgetItem *newItem = new QTableWidgetItem(query.value(1).toString());
+        ui->table1->setItem(row, 0, newItem);
+        newItem->setToolTip(query.value(1).toString());
+        newItem->setData(rId, query.value(0));
+        if(query.value(4).toBool()) newItem->setFont(font);
+
+        newItem = new QTableWidgetItem();
+        newItem->setData(Qt::DisplayRole, query.value(3));
+        ui->table1->setItem(row, 1, newItem);
+    }
+    ui->table1->setSortingEnabled(true);
+    ui->table1->sortItems(1, Qt::DescendingOrder);
+    ui->table1->selectRow(0);
+    txt->setText(QString::number(ui->table1->rowCount()));
 }
 
 void RSSManager::reloadFeeds()
 {
-    TreeWidget* treeWidget = qobject_cast<TreeWidget*>(ui->tabWidget->widget(ui->tabWidget->currentIndex()));
-    if (!treeWidget) {
+    QSqlQuery q(db);
+    q.prepare("SELECT id,url FROM feed WHERE active");
+    q.exec();
+    while (q.next()) {
+        beginToLoadSlot(QUrl(q.value(1).toString()));
+    }
+    q.finish();
+}
+
+void RSSManager::reloadFeeds(int id)
+{
+    QSqlQuery q(db);
+    q.prepare("SELECT id,url FROM feed WHERE active AND fid=?");
+    q.addBindValue(id);
+    q.exec();
+    q.exec();
+    while (q.next()) {
+        beginToLoadSlot(QUrl(q.value(1).toString()));
+    }
+    q.finish();
+}
+
+void RSSManager::addFolder()
+{
+    QString name = QInputDialog::getText(this, tr("Add new folder"), tr("Please enter new name:"));
+
+    if (name.isEmpty()) {
         return;
     }
-    treeWidget->clear();
-    QTreeWidgetItem* item = new QTreeWidgetItem();
-    item->setText(0, tr("Loading..."));
-    treeWidget->addTopLevelItem(item);
+    QSqlQuery query(db);
+    query.prepare("SELECT id FROM folder WHERE name=?");
+    query.addBindValue(name);
+    query.exec();
 
-    beginToLoadSlot(QUrl(ui->tabWidget->tabToolTip(ui->tabWidget->currentIndex())));
+    if (query.next()) {
+        QMessageBox::warning(getQupZilla(), tr("RSS feed duplicated"), tr("You already have this folder."));
+        return;
+    }
+    query.finish();
+
+    query.prepare("INSERT INTO folder (name) VALUES(?)");
+    query.bindValue(0, name);
+    query.exec();
+
+    QTreeWidgetItem* item = new QTreeWidgetItem();
+    item->setText(0, name);
+    item->setData(0, rId, query.lastInsertId().toInt());
+    ui->tree1->topLevelItem(0)->addChild(item);
+    ui->tree1->itemClicked(item,0);
+
 }
 
 void RSSManager::addFeed()
 {
     QUrl url = QUrl(QInputDialog::getText(this, tr("Add new feed"), tr("Please enter URL of new feed:")));
-
     if (url.isEmpty() || !url.isValid()) {
         return;
     }
-
     addRssFeed(url, tr("New feed"), IconProvider::iconForUrl(url));
-    refreshTable();
-}
-
-void RSSManager::deleteFeed()
-{
-    QString url = ui->tabWidget->tabToolTip(ui->tabWidget->currentIndex());
-    if (url.isEmpty()) {
-        return;
-    }
-    QSqlQuery query;
-    query.prepare("DELETE FROM rss WHERE address=?");
-    query.addBindValue(url);
-    query.exec();
-
-    ui->tabWidget->removeTab(ui->tabWidget->currentIndex());
-    if (ui->tabWidget->count() == 0) {
-        refreshTable();
-    }
-}
-
-void RSSManager::editFeed()
-{
-    QString url = ui->tabWidget->tabToolTip(ui->tabWidget->currentIndex());
-    if (url.isEmpty()) {
-        return;
-    }
-
-    QDialog dialog(this);
-    QFormLayout* layout = new QFormLayout(&dialog);
-    QLabel* label = new QLabel(&dialog);
-    QLineEdit* editUrl = new QLineEdit(&dialog);
-    QLineEdit* editTitle = new QLineEdit(&dialog);
-    QDialogButtonBox* box = new QDialogButtonBox(&dialog);
-    box->addButton(QDialogButtonBox::Ok);
-    box->addButton(QDialogButtonBox::Cancel);
-    connect(box, SIGNAL(rejected()), &dialog, SLOT(reject()));
-    connect(box, SIGNAL(accepted()), &dialog, SLOT(accept()));
-
-    label->setText(tr("Fill title and URL of a feed: "));
-    layout->addRow(label);
-    layout->addRow(new QLabel(tr("Feed title: ")), editTitle);
-    layout->addRow(new QLabel(tr("Feed URL: ")), editUrl);
-    layout->addRow(box);
-
-    editUrl->setText(ui->tabWidget->tabToolTip(ui->tabWidget->currentIndex()));
-    editTitle->setText(ui->tabWidget->tabText(ui->tabWidget->currentIndex()));
-
-    dialog.setWindowTitle(tr("Edit RSS Feed"));
-    dialog.setMinimumSize(400, 100);
-    dialog.exec();
-    if (dialog.result() == QDialog::Rejected) {
-        return;
-    }
-
-    QString address = editUrl->text();
-    QString title = editTitle->text();
-
-    if (address.isEmpty() || title.isEmpty()) {
-        return;
-    }
-
-    QSqlQuery query;
-    query.prepare("UPDATE rss SET address=?, title=? WHERE address=?");
-    query.bindValue(0, address);
-    query.bindValue(1, title);
-    query.bindValue(2, url);
-    query.exec();
-
-    refreshTable();
-}
-
-void RSSManager::customContextMenuRequested(const QPoint &position)
-{
-    TreeWidget* treeWidget = qobject_cast<TreeWidget*>(ui->tabWidget->widget(ui->tabWidget->currentIndex()));
-    if (!treeWidget) {
-        return;
-    }
-
-    if (!treeWidget->itemAt(position)) {
-        return;
-    }
-
-    QString link = treeWidget->itemAt(position)->toolTip(0);
-    if (link.isEmpty()) {
-        return;
-    }
-
-    QMenu menu;
-    menu.addAction(tr("Open link in current tab"), getQupZilla(), SLOT(loadActionUrl()))->setData(link);
-    menu.addAction(tr("Open link in new tab"), this, SLOT(loadFeedInNewTab()))->setData(link);
-    menu.addAction(tr("Open link in &private window"), mApp, SLOT(startPrivateBrowsing()))->setData(link);
-
-    //Prevent choosing first option with double rightclick
-    QPoint pos = treeWidget->viewport()->mapToGlobal(position);
-    QPoint p(pos.x(), pos.y() + 1);
-    menu.exec(p);
 }
 
 void RSSManager::loadFeed(QTreeWidgetItem* item)
@@ -280,7 +621,6 @@ void RSSManager::controlLoadFeed(QTreeWidgetItem* item)
     if (!item || item->toolTip(0).isEmpty()) {
         return;
     }
-
     getQupZilla()->tabWidget()->addView(QUrl(item->toolTip(0)), qzSettings->newTabPosition);
 }
 
@@ -293,21 +633,27 @@ void RSSManager::loadFeedInNewTab()
 
 void RSSManager::beginToLoadSlot(const QUrl &url)
 {
-    FollowRedirectReply* reply = new FollowRedirectReply(url, m_networkManager);
+    QDateTime tmp(QDateTime::fromString(selectValue(db, "lm","feed","url", QVariant(url)).toString()));
+        QList<QPair<QString, QString>> list;
+    if(!tmp.isNull() ) {
+            list << QPair<QString, QString>("If-Modified-Since", tmp.toString("ddd, dd MMM yyyy HH:mm:ss").append(" GMT"));
+    }
+
+    FollowRedirectReply* reply = new FollowRedirectReply(url, m_networkManager, list);
     connect(reply, SIGNAL(finished()), this, SLOT(finished()));
 
     QPair<FollowRedirectReply*, QUrl> pair;
     pair.first = reply;
     pair.second = url;
     m_replies.append(pair);
+
 }
 
 void RSSManager::finished()
 {
     FollowRedirectReply* reply = qobject_cast<FollowRedirectReply*> (sender());
-    if (!reply) {
-        return;
-    }
+    if (!reply) return;
+    if(reply->status() == 304) return;
 
     QString replyUrl;
     for (int i = 0; i < m_replies.count(); i++) {
@@ -317,73 +663,21 @@ void RSSManager::finished()
             break;
         }
     }
+    if (replyUrl.isEmpty()) return;
 
-    if (replyUrl.isEmpty()) {
-        return;
-    }
-
-    QString currentTag;
-    QString linkString;
-    QString titleString;
-
-    QXmlStreamReader xml;
-    xml.addData(reply->readAll());
-
-    reply->deleteLater();
-
-    int tabIndex = -1;
-    for (int i = 0; i < ui->tabWidget->count(); i++) {
-        if (replyUrl == ui->tabWidget->tabToolTip(i)) {
-            tabIndex = i;
-            break;
-        }
-    }
-
-    if (tabIndex == -1) {
-        return;
-    }
-
-    TreeWidget* treeWidget = qobject_cast<TreeWidget*>(ui->tabWidget->widget(tabIndex));
-    if (!treeWidget) {
-        return;
-    }
-    treeWidget->clear();
-
-    while (!xml.atEnd()) {
-        xml.readNext();
-        if (xml.isStartElement()) {
-            if (xml.name() == QLatin1String("item")) {
-                linkString = xml.attributes().value("rss:about").toString();
-            }
-            currentTag = xml.qualifiedName().toString();
-        }
-        else if (xml.isEndElement()) {
-            if (xml.qualifiedName() == QLatin1String("item")) {
-                QTreeWidgetItem* item = new QTreeWidgetItem;
-                item->setText(0, titleString);
-                item->setIcon(0, QIcon(":/icons/other/feed.png"));
-                item->setToolTip(0, linkString);
-                treeWidget->addTopLevelItem(item);
-
-                titleString.clear();
-                linkString.clear();
-            }
-        }
-        else if (xml.isCharacters() && !xml.isWhitespace()) {
-            if (currentTag == QLatin1String("title")) {
-                titleString = xml.text().toString();
-            }
-            else if (currentTag == QLatin1String("link")) {
-                linkString += xml.text().toString();
-            }
-        }
-    }
-
-    if (treeWidget->topLevelItemCount() == 0) {
-        QTreeWidgetItem* item = new QTreeWidgetItem;
-        item->setText(0, tr("Error in fetching feed"));
-        treeWidget->addTopLevelItem(item);
-    }
+    QByteArray arr(reply->readAll());
+    QThread* thread = new QThread();
+    WorkerThread* worker = new WorkerThread();
+    worker->add(reply->originalUrl().toString(), arr, reply->lm(), reply->status());
+    worker->moveToThread(thread);
+    connect(thread, SIGNAL(started()), this, SLOT(countP()));
+    connect(thread, SIGNAL(finished()), this, SLOT(countM()));
+    connect( thread, &QThread::started, worker, &WorkerThread::run);
+    connect( worker, &WorkerThread::finished, thread, &QThread::quit);
+    connect( worker, &WorkerThread::finished, worker, &WorkerThread::deleteLater);
+    connect( thread, &QThread::finished, thread, &QThread::deleteLater);
+    connect(worker, &WorkerThread::update1,this,&RSSManager::update1);
+    thread->start();
 }
 
 bool RSSManager::addRssFeed(const QUrl &url, const QString &title, const QIcon &icon)
@@ -391,8 +685,8 @@ bool RSSManager::addRssFeed(const QUrl &url, const QString &title, const QIcon &
     if (url.isEmpty()) {
         return false;
     }
-    QSqlQuery query;
-    query.prepare("SELECT id FROM rss WHERE address=?");
+    QSqlQuery query(db);
+    query.prepare("SELECT id FROM feed WHERE url=?");
     query.addBindValue(url);
     query.exec();
 
@@ -403,7 +697,7 @@ bool RSSManager::addRssFeed(const QUrl &url, const QString &title, const QIcon &
             image.load(":icons/menu/rss.png");
         }
 
-        query.prepare("INSERT INTO rss (address, title, icon) VALUES(?,?,?)");
+        query.prepare("INSERT INTO feed (url, title, icon, fid) VALUES(?,?,?,?)");
         query.bindValue(0, url);
         query.bindValue(1, title);
         QByteArray ba;
@@ -411,6 +705,7 @@ bool RSSManager::addRssFeed(const QUrl &url, const QString &title, const QIcon &
         buffer.open(QIODevice::WriteOnly);
         image.save(&buffer, "PNG");
         query.bindValue(2, buffer.data());
+        query.bindValue(3, 1);
         query.exec();
         return true;
     }
@@ -422,4 +717,96 @@ bool RSSManager::addRssFeed(const QUrl &url, const QString &title, const QIcon &
 RSSManager::~RSSManager()
 {
     delete ui;
+    db.close();
+    db = QSqlDatabase();
+    QSqlDatabase::removeDatabase("rss");
+}
+
+QVariant RSSManager::selectValue(QSqlDatabase& db, const QString& col1, const QString& t, const QString& col2, const QVariant& id)
+{
+    QString sql;
+    sql.append("select ").append(col1).append(" from ").append(t);
+    if(id.isValid()) sql.append(" where ").append(col2).append("=:id");
+
+    QSqlQuery query(db);
+    query.prepare(sql);
+    if(id.isValid()) query.addBindValue(id);
+    query.setForwardOnly(true);
+    query.exec();
+    query.first();
+    QVariant val = query.value(0);
+    query.finish();
+    return val;
+}
+
+QVariant RSSManager::updateValue(const QString& t, const QString& col1, const QVariant& val,
+                                 const QString& col2, const QVariant& id)
+{
+    QString sql;
+    sql.append("UPDATE ").append(t).append(" set ").append(col1).append("=?");
+    if(id.isValid()) sql.append(" where ").append(col2).append("=?");
+
+    QSqlQuery query(db);
+    query.prepare(sql);
+    query.bindValue(0, val);
+    if(id.isValid()) query.bindValue(1, id);
+    query.exec();
+    query.finish();
+    return QVariant();
+}
+
+void RSSManager::update1(const QString& str){
+    QList<QTreeWidgetItem *> list = ui->tree1->findItems(str, Qt::MatchFixedString|Qt::MatchRecursive, 0);
+    if(list.size()>0) list[0]->setText(0, selectValue(db, "title","feed","url", str).toString());
+    QPixmap pix = QPixmap();
+    pix.loadFromData(selectValue(db, "icon", "feed", "url", str).toByteArray());
+    if(pix.isNull()) pix = QPixmap(":/icons/other/feed.png");
+    if(list.size() > 0) list[0]->setIcon(0, QIcon(pix));
+
+    QString name = selectValue(db, "title", "feed", "url", str).toString();
+    QUrl url(str);
+    FollowRedirectReply* reply1 = new FollowRedirectReply(QUrl(QString("%1://%2/favicon.ico").arg(url.scheme()).arg(url.host())), m_networkManager);
+    connect(reply1, &FollowRedirectReply::finished, [=]{
+       QByteArray arr(reply1->readAll());
+       QPixmap pix = QPixmap();
+       pix.loadFromData( arr );
+       if (pix.isNull()){
+           if (url.host().isEmpty() || url.toString().count('.') < 2) return;
+           QString h = url.host().mid(url.host().lastIndexOf(".", url.host().lastIndexOf(".")-1)+1);
+           FollowRedirectReply* reply1 = new FollowRedirectReply(QUrl(QString("%1://%2/favicon.ico").arg(url.scheme()).arg(h)), m_networkManager);
+           connect(reply1, &FollowRedirectReply::finished, [=]{
+              QByteArray arr(reply1->readAll());
+              QPixmap pix = QPixmap();
+              pix.loadFromData( arr );
+              if (pix.isNull()) return;
+              updateValue("feed", "icon", arr, "url", url.toString());
+              QList<QTreeWidgetItem *> list = ui->tree1->findItems(name, Qt::MatchFixedString|Qt::MatchRecursive, 0);
+              if(list.size()>0) list[0]->setIcon(0, QIcon(pix));
+           });
+           return;
+       }
+       updateValue("feed", "icon", arr, "url", url.toString());
+       QList<QTreeWidgetItem *> list = ui->tree1->findItems(name, Qt::MatchFixedString|Qt::MatchRecursive, 0);
+       if(list.size()>0) list[0]->setIcon(0, QIcon(pix));
+    });
+    connect(reply1, &FollowRedirectReply::finished, reply1, &QObject::deleteLater);
+}
+
+void RSSManager::update(){
+     if (ui->tree1->selectedItems().size() > 0) {
+        ui->tree1->itemClicked(ui->tree1->selectedItems()[0], 0);
+     } else {
+        ui->tree1->itemClicked(ui->tree1->topLevelItem(0), 0);
+     }
+}
+
+void RSSManager::countP(){
+    if(aCount++ == 0) thStart();
+}
+
+void RSSManager::countM(){
+    if(aCount-- == 1){
+        thStop();
+        QTimer::singleShot(100, this, &RSSManager::update);
+    }
 }

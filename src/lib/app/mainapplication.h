@@ -104,7 +104,7 @@ public:
     PluginProxy* plugins();
     BrowsingLibrary* browsingLibrary();
 
-    RSSManager* rssManager() {return m_rssManager;};
+    RSSManager* rssManager();
     NetworkManager* networkManager() {return m_networkManager;};
     RestoreManager* restoreManager() {return m_restoreManager;};
     SessionManager* sessionManager() {return m_sessionManager;};

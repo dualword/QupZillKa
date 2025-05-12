@@ -1510,6 +1510,7 @@ void BrowserWindow::closeEvent(QCloseEvent* event)
     #endif
 
     event->accept();
+    deleteLater();
 }
 
 void BrowserWindow::closeWindow()

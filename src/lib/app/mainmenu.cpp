@@ -29,6 +29,7 @@
 #include "browserwindow.h"
 #include "downloadmanager.h"
 #include "mainapplication.h"
+#include "rssmanager.h"
 #include "browsinglibrary.h"
 #include "clearprivatedata.h"
 #include "qzsettings.h"
@@ -335,8 +336,9 @@ void MainMenu::showOptimizer()
     QPushButton *opt = msgBox.addButton(tr("Optimize"), QMessageBox::ActionRole);
     opt->disconnect();
     connect(opt, &QAbstractButton::clicked, this,
-            [=](){
+            [this](){
         mApp->setOverrideCursor(Qt::WaitCursor);
+        mApp->rssManager()->optimizeDb();
         QString sizeBefore = QzTools::fileSizeToString(QFileInfo(DataPaths::currentProfilePath() + "/browsedata.db").size());
         IconProvider::instance()->clearOldIconsInDatabase();
         QString sizeAfter = QzTools::fileSizeToString(QFileInfo(DataPaths::currentProfilePath() + "/browsedata.db").size());
@@ -603,11 +605,11 @@ void MainMenu::init()
     m_menuTools = new QMenu(tr("&Tools"));
     connect(m_menuTools, SIGNAL(aboutToShow()), this, SLOT(aboutToShowToolsMenu()));
 
+    ADD_ACTION("Tools/RssReader", m_menuTools, QIcon(), tr("RSS &Reader"), SLOT(showRssManager()), "");
     ADD_ACTION("Tools/DownloadManager", m_menuTools, QIcon(), tr("&Download Manager"), SLOT(showDownloadManager()), "Ctrl+Y");
     ADD_ACTION("Tools/CookiesManager", m_menuTools, QIcon(), tr("&Cookies Manager"), SLOT(showCookieManager()), "");
     ADD_ACTION("Tools/ClearRecentHistory", m_menuTools, QIcon::fromTheme(QSL("edit-clear")), tr("Clear &History"), SLOT(showClearRecentHistoryDialog()), "Ctrl+Shift+Del");
-     ADD_ACTION("Tools/Optimizer", m_menuTools, QIcon(), tr("&Optimize database"),SLOT(showOptimizer()), "");
-    //ADD_ACTION("Tools/RssReader", m_menuTools, QIcon(), tr("RSS &Reader"), SLOT(showRssManager()), "");
+    ADD_ACTION("Tools/Optimizer", m_menuTools, QIcon(), tr("&Optimize database"),SLOT(showOptimizer()), "");
     m_menuTools->addSeparator();
     ADD_ACTION("Tools/SiteInfo", m_menuTools, QIcon::fromTheme(QSL("dialog-information")), tr("Site &Info"), SLOT(showSiteInfo()), "Ctrl+I");
     action->setShortcutContext(Qt::WidgetShortcut);
