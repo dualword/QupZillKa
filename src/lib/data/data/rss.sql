@@ -40,8 +40,7 @@ CREATE TABLE IF NOT EXISTS "item" (
     "m_url" TEXT,
     "m_type" TEXT,
     "m_thurl" TEXT,
-    pubdate TEXT,
-    UNIQUE (fid, url)
+    pubdate TEXT
 );
 CREATE INDEX IF NOT EXISTS "idx_item_url" ON item (url);
 CREATE INDEX IF NOT EXISTS "idx_item_pd" ON item (pubDate);
