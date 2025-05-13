@@ -14,7 +14,6 @@ Plugins:
 License: GNU General Public License (Version 3)  
 Source code: https://github.com/dualword/QupZillKa/  
 
-<div align="center">
 <table class="images" align="center" width="100%" border=0 cellspacing=0 cellpadding=0 style="border:0px solid white; width:100%;">
   <tr style="border: 0px;">
     <td align='center' style="border:0px;"><img src="rss.png" height="100" width="150" alt="RSS Reader" title="RSS Reader"/></td>
@@ -28,4 +27,3 @@ Source code: https://github.com/dualword/QupZillKa/
     <td align='center' style="border:0px;"><img src="adblock.png" height="100" width="150" alt="AdBlock" title="AdBlock"/></td>
   </tr>
 </table>
-</div>
