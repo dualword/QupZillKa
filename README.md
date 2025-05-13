@@ -21,9 +21,7 @@ Source code: https://github.com/dualword/QupZillKa/
   <tr style="border: 0px;">
     <td align='center' style="border:0px;">
     <img src="screenshot.png" height="100" width="150" alt="Network traffic monitor" title="Network traffic monitor"/>
-    <img src="youtube.png" height="100" width="150" alt="Youtube" title="Youtube"/></td>
-  </tr>
-  <tr style="border: 0px;">
-    <td align='center' style="border:0px;"><img src="adblock.png" height="100" width="150" alt="AdBlock" title="AdBlock"/></td>
+    <img src="youtube.png" height="100" width="150" alt="Youtube" title="Youtube"/>
+    <img src="adblock.png" height="100" width="150" alt="AdBlock" title="AdBlock"/></td>
   </tr>
 </table>
