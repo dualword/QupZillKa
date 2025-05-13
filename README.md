@@ -15,17 +15,17 @@ License: GNU General Public License (Version 3)
 Source code: https://github.com/dualword/QupZillKa/  
 
 <div align="center">
-<table width="100%" border=0 cellspacing=1 cellpadding=0>
-  <tr>
-    <td align='center'><img src="rss.png" height="100" width="150" alt="RSS Reader" title="RSS Reader"/></td>
+<table class="images" align="center" width="100%" border=0 cellspacing=0 cellpadding=0 style="border:0px solid white; width:100%;">
+  <tr style="border: 0px;">
+    <td align='center' style="border:0px;"><img src="rss.png" height="100" width="150" alt="RSS Reader" title="RSS Reader"/></td>
   </tr>
-  <tr>
-    <td align='center'>
+  <tr style="border: 0px;">
+    <td align='center' style="border:0px;">
     <img src="screenshot.png" height="100" width="150" alt="Network traffic monitor" title="Network traffic monitor"/>
     <img src="youtube.png" height="100" width="150" alt="Youtube" title="Youtube"/></td>
   </tr>
-  <tr>
-    <td align='center'><img src="adblock.png" height="100" width="150" alt="AdBlock" title="AdBlock"/></td>
+  <tr style="border: 0px;">
+    <td align='center' style="border:0px;"><img src="adblock.png" height="100" width="150" alt="AdBlock" title="AdBlock"/></td>
   </tr>
 </table>
 </div>
