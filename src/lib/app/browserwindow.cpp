@@ -570,7 +570,7 @@ void BrowserWindow::loadSettings()
 
     //Url settings
     settings.beginGroup("Web-URL-Settings");
-    m_homepage = settings.value("homepage", "").toUrl();
+    m_homepage = settings.value("homepage", "https://google.com").toUrl();
     settings.endGroup();
 
     //Browser Window settings
