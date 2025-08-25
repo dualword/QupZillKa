@@ -236,7 +236,7 @@ Preferences::Preferences(BrowserWindow* window)
     ui->alwaysShowGoIcon->setChecked(settings.value("alwaysShowGoIcon", false).toBool());
     ui->selectAllOnFocus->setChecked(settings.value("SelectAllTextOnDoubleClick", true).toBool());
     ui->selectAllOnClick->setChecked(settings.value("SelectAllTextOnClick", false).toBool());
-    bool showPBinAB = settings.value("ShowLoadingProgress", false).toBool();
+    bool showPBinAB = settings.value("ShowLoadingProgress", true).toBool();
     ui->showLoadingInAddressBar->setChecked(showPBinAB);
     ui->adressProgressSettings->setEnabled(showPBinAB);
     ui->progressStyleSelector->setCurrentIndex(settings.value("ProgressStyle", 0).toInt());

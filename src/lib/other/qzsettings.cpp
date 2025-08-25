@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) http://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - WebKit based browser
 * Copyright (C) 2010-2016  David Rosca <nowrep@gmail.com>
@@ -30,7 +31,7 @@ void QzSettings::loadSettings()
     settings.beginGroup("AddressBar");
     selectAllOnDoubleClick = settings.value("SelectAllTextOnDoubleClick", true).toBool();
     selectAllOnClick = settings.value("SelectAllTextOnClick", false).toBool();
-    showLoadingProgress = settings.value("ShowLoadingProgress", false).toBool();
+    showLoadingProgress = settings.value("ShowLoadingProgress", true).toBool();
     showLocationSuggestions = settings.value("showSuggestions", 0).toInt();
     showSwitchTab = settings.value("showSwitchTab", true).toBool();
     alwaysShowGoIcon = settings.value("alwaysShowGoIcon", false).toBool();
