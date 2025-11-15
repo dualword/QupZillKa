@@ -22,3 +22,9 @@ Source code: https://github.com/dualword/QupZillKa/
 <img src="youtube.png" height="100" width="150" alt="Youtube" title="Youtube"/>
 <img src="adblock.png" height="100" width="150" alt="AdBlock" title="AdBlock"/>
 </p>
+
+<hr>
+<center>AI-generated logo:<center/>
+<p align="middle">
+<img src="logo1.png" height="100" width="100" alt="AI-generated logo" title="AI-generated logo"/>
+</p>
