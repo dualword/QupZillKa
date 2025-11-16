@@ -44,7 +44,7 @@
 #include <QWebEngineHistory>
 #include <QClipboard>
 #include <QMimeData>
-#include <QWebEngineContextMenuData>
+#include <QWebEngineContextMenuRequest>
 #include <QStackedLayout>
 #include <QScrollBar>
 #include <QPrintDialog>
@@ -142,7 +142,6 @@ void WebView::setPage(WebPage *page)
             emit m_page->loadFinished(true);
         }
         mApp->plugins()->emitWebPageDeleted(m_page);
-        m_page->setView(nullptr);
         m_page->deleteLater();
     }
 
@@ -398,10 +397,11 @@ void WebView::printPage()
             m_page->printToPdf(dialog->printer()->outputFileName(), dialog->printer()->pageLayout());
             delete dialog;
         } else {
-            m_page->print(dialog->printer(), [=](bool success) {
-                Q_UNUSED(success);
-                delete dialog;
-            });
+            print(printer); //TODO:
+            // m_page->print(dialog->printer(), [=](bool success) {
+            //     Q_UNUSED(success);
+            //     delete dialog;
+            // });
         }
     }
 }
@@ -471,14 +471,16 @@ void WebView::openUrlInNewWindow()
 void WebView::sendTextByMail()
 {
     if (QAction* action = qobject_cast<QAction*>(sender())) {
-        const QUrl mailUrl = QUrl::fromEncoded("mailto:%20?body=" + QUrl::toPercentEncoding(action->data().toString()));
+        const QUrl mailUrl = QUrl::fromEncoded(
+            QByteArray("mailto:%20?body=" + QUrl::toPercentEncoding(action->data().toString())));
         QDesktopServices::openUrl(mailUrl);
     }
 }
 
 void WebView::sendPageByMail()
 {
-    const QUrl mailUrl = QUrl::fromEncoded("mailto:%20?body=" + QUrl::toPercentEncoding(url().toEncoded()) + "&subject=" + QUrl::toPercentEncoding(title()));
+    const QUrl mailUrl = QUrl::fromEncoded(
+        QByteArray("mailto:%20?body=" + QUrl::toPercentEncoding(url().toEncoded()) + "&subject=" + QUrl::toPercentEncoding(title())));
     QDesktopServices::openUrl(mailUrl);
 }
 
@@ -655,7 +657,7 @@ void WebView::createContextMenu(QMenu *menu, WebHitTestResult &hitTest)
     // cppcheck-suppress variableScope
     int spellCheckActionCount = 0;
 
-    const QWebEngineContextMenuData &contextMenuData = page()->contextMenuData();
+    const QWebEngineContextMenuRequest &contextMenuData = *lastContextMenuRequest();
     hitTest.updateWithContextMenuData(contextMenuData);
 
     if (!contextMenuData.misspelledWord().isEmpty()) {
@@ -765,11 +767,11 @@ void WebView::createPageContextMenu(QMenu* menu)
     menu->addSeparator();
 
     if (url().scheme() == QLatin1String("http") || url().scheme() == QLatin1String("https")) {
-        const QUrl w3url = QUrl::fromEncoded("http://validator.w3.org/check?uri=" + QUrl::toPercentEncoding(url().toEncoded()));
+        const QUrl w3url = QUrl::fromEncoded(QByteArray("http://validator.w3.org/check?uri=" + QUrl::toPercentEncoding(url().toEncoded())));
         menu->addAction(QIcon(":icons/sites/w3.png"), tr("Validate page"), this, SLOT(openUrlInSelectedTab()))->setData(w3url);
 
         QByteArray langCode = mApp->currentLanguage().left(2).toUtf8();
-        const QUrl gturl = QUrl::fromEncoded("http://translate.google.com/translate?sl=auto&tl=" + langCode + "&u=" + QUrl::toPercentEncoding(url().toEncoded()));
+        const QUrl gturl = QUrl::fromEncoded(QByteArray("http://translate.google.com/translate?sl=auto&tl=" + langCode + "&u=" + QUrl::toPercentEncoding(url().toEncoded())));
         menu->addAction(QIcon(":icons/sites/translate.png"), tr("Translate page"), this, SLOT(openUrlInSelectedTab()))->setData(gturl);
     }
 

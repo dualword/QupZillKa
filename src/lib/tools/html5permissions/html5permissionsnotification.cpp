@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2013-2018 David Rosca <nowrep@gmail.com>
@@ -23,6 +24,7 @@
 
 #include <QTimer>
 #include <QWebEnginePage>
+#include <QWebEngineView>
 
 HTML5PermissionsNotification::HTML5PermissionsNotification(const QUrl &origin, QWebEnginePage* page, const QWebEnginePage::Feature &feature)
     : AnimatedWidget(AnimatedWidget::Down, 300, 0)
@@ -91,7 +93,7 @@ void HTML5PermissionsNotification::grantPermissions()
     QTimer::singleShot(0, this, [this]() {
         // We need to have cursor inside view to correctly grab mouse
         if (m_feature == QWebEnginePage::MouseLock) {
-            QWidget *view = m_page->view();
+            QWidget *view = QWebEngineView::forPage(m_page);
             QCursor::setPos(view->mapToGlobal(view->rect().center()));
         }
 

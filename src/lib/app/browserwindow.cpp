@@ -67,18 +67,17 @@
 #include <QTimer>
 #include <QShortcut>
 #include <QStackedWidget>
-#include <QTextCodec>
 #include <QFileDialog>
 #include <QDesktopServices>
 #include <QWebEngineHistory>
 #include <QWebEngineSettings>
 #include <QMessageBox>
-#include <QDesktopWidget>
 #include <QToolTip>
 #include <QScrollArea>
 #include <QCollator>
 #include <QTemporaryFile>
 #include <QScreen>
+#include <QActionGroup>
 
 #ifdef QZ_WS_X11
 #include <QX11Info>
@@ -1070,9 +1069,7 @@ void BrowserWindow::createEncodingMenu(QMenu* menu)
     QStringList otherCodecs;
     QStringList allCodecs;
 
-    foreach (const int mib, QTextCodec::availableMibs()) {
-        const QString codecName = QString::fromUtf8(QTextCodec::codecForMib(mib)->name());
-
+    foreach (const auto& codecName, QStringConverter::availableCodecs()) {
         if (!allCodecs.contains(codecName))
             allCodecs.append(codecName);
         else
@@ -1332,7 +1329,7 @@ void BrowserWindow::keyPressEvent(QKeyEvent* event)
         break;
 
     case Qt::Key_Backtab:
-        if (event->modifiers() == (Qt::ControlModifier + Qt::ShiftModifier)) {
+        if (event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)) {
             static_cast<QObject*>(m_tabWidget)->event(event);
         }
         break;

@@ -31,6 +31,7 @@
 #include <QWebEngineScriptCollection>
 #include <QStyle>
 #include <QStyleOption>
+#include <QPainter>
 
 Q_GLOBAL_STATIC(WebScrollBarManager, qz_web_scrollbar_manager)
 
@@ -213,8 +214,9 @@ void WebScrollBarManager::createUserScript(int thickness)
 
 void WebScrollBarManager::removeUserScript()
 {
-    QWebEngineScript script = mApp->webProfile()->scripts()->findScript(QSL("_qupzilla_scrollbar"));
-    mApp->webProfile()->scripts()->remove(script);
+    for (const QWebEngineScript& script : mApp->webProfile()->scripts()->find(QSL("_qupzilla_scrollbar"))) {
+        mApp->webProfile()->scripts()->remove(script);
+    }
 }
 
 QSize WebScrollBarManager::viewportSize(WebView *view, int thickness) const

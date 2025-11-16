@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - WebKit based browser
 * Copyright (C) 2010-2014  David Rosca <nowrep@gmail.com>
@@ -27,7 +28,7 @@
 OperaImporter::OperaImporter(QObject* parent)
     : BookmarksImporter(parent)
 {
-    m_stream.setCodec("UTF-8");
+    m_stream.setEncoding(QStringConverter::Utf8);
 }
 
 QString OperaImporter::description() const

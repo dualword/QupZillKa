@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -249,8 +250,7 @@ QByteArray AutoFill::exportPasswords()
     QByteArray output;
 
     QXmlStreamWriter stream(&output);
-    stream.setCodec("UTF-8");
-    stream.setAutoFormatting(true);
+     stream.setAutoFormatting(true);
 
     stream.writeStartDocument();
     stream.writeStartElement("passwords");

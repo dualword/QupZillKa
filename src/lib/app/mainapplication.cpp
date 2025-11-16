@@ -64,9 +64,9 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QWebEngineProfile>
-#include <QWebEngineDownloadItem>
 #include <QWebEngineScriptCollection>
 #include <QWebEngineUrlScheme>
+#include <QNetworkInformation>
 
 #ifdef Q_OS_WIN
 #include <QtWin>
@@ -110,7 +110,6 @@ MainApplication::MainApplication(int &argc, char** argv)
     , m_registerQAppAssociation(0)
 #endif
 {
-    setAttribute(Qt::AA_UseHighDpiPixmaps);
     setAttribute(Qt::AA_DontCreateNativeWidgetSiblings);
 
     setApplicationName(QLatin1String("QupZillKa"));
@@ -286,6 +285,7 @@ MainApplication::MainApplication(int &argc, char** argv)
     connect(m_webProfile, &QWebEngineProfile::downloadRequested, this, &MainApplication::downloadRequested);
 
     m_networkManager = new NetworkManager(this);
+    QNetworkInformation::loadDefaultBackend();
     m_history = new History(this);
     m_userAgentManager = new UserAgentManager(this);
 
@@ -878,7 +878,7 @@ void MainApplication::runDeferredPostLaunchActions()
 
 }
 
-void MainApplication::downloadRequested(QWebEngineDownloadItem *download)
+void MainApplication::downloadRequested(QWebEngineDownloadRequest *download)
 {
     downloadManager()->download(download);
 }
@@ -1187,8 +1187,7 @@ void MainApplication::setUserStyleSheet(const QString &filePath)
 
     const QString name = QStringLiteral("_qupzilla_userstylesheet");
 
-    QWebEngineScript oldScript = m_webProfile->scripts()->findScript(name);
-    if (!oldScript.isNull()) {
+    foreach (const QWebEngineScript &oldScript, m_webProfile->scripts()->find(name)) {
         m_webProfile->scripts()->remove(oldScript);
     }
 

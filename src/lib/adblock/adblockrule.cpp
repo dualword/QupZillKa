@@ -58,7 +58,7 @@
 
 static QString toSecondLevelDomain(const QUrl &url)
 {
-    const QString topLevelDomain = url.topLevelDomain();
+    const QString topLevelDomain = url.host(); //TODO:
     const QString urlHost = url.host();
 
     if (topLevelDomain.isEmpty() || urlHost.isEmpty()) {

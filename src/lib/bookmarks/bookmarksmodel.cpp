@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2014-2017 David Rosca <nowrep@gmail.com>
@@ -23,6 +24,7 @@
 #include <QMimeData>
 #include <QTimer>
 #include <QStyle>
+#include <QIODevice>
 
 //#define BOOKMARKSMODEL_DEBUG
 

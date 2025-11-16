@@ -70,14 +70,14 @@ bool NetworkManager::certificateError(const QWebEngineCertificateError &error, Q
 {
     const QString &host = error.url().host();
 
-    if (m_ignoredSslErrors.contains(host) && m_ignoredSslErrors.value(host) == error.error())
+    if (m_ignoredSslErrors.contains(host) && m_ignoredSslErrors.value(host) == error.type())
         return true;
 
     QString title = tr("SSL Certificate Error!");
     QString text1 = tr("The page you are trying to access has the following errors in the SSL certificate:");
     QString text2 = tr("Would you like to make an exception for this certificate?");
 
-    QString message = QSL("<b>%1</b><p>%2</p><ul><li>%3</li></ul><p>%4</p>").arg(title, text1, error.errorDescription(), text2);
+    QString message = QSL("<b>%1</b><p>%2</p><ul><li>%3</li></ul><p>%4</p>").arg(title, text1, error.description(), text2);
 
     SslErrorDialog dialog(parent);
     dialog.setText(message);
@@ -87,7 +87,7 @@ bool NetworkManager::certificateError(const QWebEngineCertificateError &error, Q
     case SslErrorDialog::Yes:
         // TODO: Permanent exceptions
     case SslErrorDialog::OnlyForThisSession:
-        m_ignoredSslErrors[error.url().host()] = error.error();
+        m_ignoredSslErrors[error.url().host()] = error.type();
         return true;
 
     case SslErrorDialog::No:
@@ -281,14 +281,11 @@ void NetworkManager::loadSettings()
 
 void NetworkManager::shutdown()
 {
-    mApp->webProfile()->setRequestInterceptor(nullptr);
+    mApp->webProfile()->setUrlRequestInterceptor(nullptr);
 }
 
 QNetworkReply *NetworkManager::createRequest(QNetworkAccessManager::Operation op, const QNetworkRequest &request, QIODevice *outgoingData)
 {
     QNetworkRequest req = request;
-    req.setHeader(QNetworkRequest::UserAgentHeader, mApp->userAgentManager()->globalUserAgent().toUtf8());
-    req.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
-
     return QNetworkAccessManager::createRequest(op, req, outgoingData);
 }

@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2023) http://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2014-2018 David Rosca <nowrep@gmail.com>
@@ -96,7 +96,9 @@ void DataPaths::init()
 #endif
 
     m_paths[Translations].append(m_paths[AppData].at(0) + QLatin1String("/locale"));
+    m_paths[Themes].insert(0, QApplication::applicationDirPath() + QLatin1String("/themes"));
     m_paths[Themes].append(m_paths[AppData].at(0) + QLatin1String("/themes"));
+    m_paths[Plugins].insert(0, QApplication::applicationDirPath() + QLatin1String("/plugins"));
     m_paths[Plugins].append(m_paths[AppData].at(0) + QLatin1String("/plugins"));
 
     // Config

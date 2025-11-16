@@ -10,6 +10,7 @@
 #include <QMenu>
 #include <QDir>
 #include <QMessageBox>
+#include <QPainter>
 
 ScreenshotPlugin::ScreenshotPlugin() : QObject() {
 

@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2017 David Rosca <nowrep@gmail.com>
@@ -114,7 +115,7 @@ void SessionManagerDialog::refresh()
     for (const auto &session : sessions) {
         QTreeWidgetItem *item = new QTreeWidgetItem;
         item->setText(0, session.name);
-        item->setText(1, QFileInfo(session.filePath).lastModified().toString(Qt::DefaultLocaleShortDate));
+        item->setText(1, QFileInfo(session.filePath).lastModified().toString(Qt::ISODate));
         item->setData(0, SessionFileRole, session.filePath);
         item->setData(0, IsBackupSessionRole, session.isBackup);
         item->setData(0, IsActiveSessionRole, session.isActive);

@@ -1,4 +1,4 @@
-/* QupZillKa (2023) http://github.com/dualword/QupZillKa License:GNU GPL*/
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -169,7 +169,7 @@ WebTab::WebTab(QWidget *parent)
     m_notificationWidget = new QWidget(this);
     m_notificationWidget->setAutoFillBackground(true);
     QPalette pal = m_notificationWidget->palette();
-    pal.setColor(QPalette::Background, pal.window().color().darker(110));
+    pal.setColor(QPalette::Window, pal.window().color().darker(110));
     m_notificationWidget->setPalette(pal);
 
     QVBoxLayout *nlayout = new QVBoxLayout(m_notificationWidget);

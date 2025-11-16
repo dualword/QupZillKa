@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /****************************************************************************
 **
 ** Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
@@ -49,6 +50,7 @@
 #include <QtCore/QCoreApplication>
 #include <QtCore/QTime>
 #include <QtCore/QDataStream>
+#include <QRegularExpression>
 
 #if defined(Q_OS_WIN)
 #include <QtCore/QLibrary>
@@ -85,7 +87,7 @@ QtLocalPeer::QtLocalPeer(QObject* parent, const QString &appId)
 #endif
         prefix = id.section(QLatin1Char('/'), -1);
     }
-    prefix.remove(QRegExp("[^a-zA-Z]"));
+    prefix.remove(QRegularExpression("[^a-zA-Z]"));
     prefix.truncate(6);
 
     QByteArray idc = id.toUtf8();

@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2015-2018 David Rosca <nowrep@gmail.com>
@@ -18,7 +19,7 @@
 #include "webhittestresult.h"
 #include "webpage.h"
 
-#include <QWebEngineContextMenuData>
+#include <QWebEngineContextMenuRequest>
 
 WebHitTestResult::WebHitTestResult(const WebPage *page, const QPoint &pos)
     : m_isNull(true)
@@ -89,9 +90,9 @@ WebHitTestResult::WebHitTestResult(const WebPage *page, const QPoint &pos)
     init(p->url(), p->execJavaScript(js, WebPage::SafeJsWorld).toMap());
 }
 
-void WebHitTestResult::updateWithContextMenuData(const QWebEngineContextMenuData &data)
+void WebHitTestResult::updateWithContextMenuData(const QWebEngineContextMenuRequest &data)
 {
-    if (!data.isValid() || data.position() != m_pos) {
+    if (data.position() != m_pos) {
         return;
     }
 
@@ -101,12 +102,12 @@ void WebHitTestResult::updateWithContextMenuData(const QWebEngineContextMenuData
     m_isContentSelected = !data.selectedText().isEmpty();
 
     switch (data.mediaType()) {
-    case QWebEngineContextMenuData::MediaTypeImage:
+    case QWebEngineContextMenuRequest::MediaTypeImage:
         m_imageUrl = data.mediaUrl();
         break;
 
-    case QWebEngineContextMenuData::MediaTypeVideo:
-    case QWebEngineContextMenuData::MediaTypeAudio:
+    case QWebEngineContextMenuRequest::MediaTypeVideo:
+    case QWebEngineContextMenuRequest::MediaTypeAudio:
         m_mediaUrl = data.mediaUrl();
         break;
 

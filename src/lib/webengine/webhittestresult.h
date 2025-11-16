@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - QtWebEngine based browser
 * Copyright (C) 2015-2016 David Rosca <nowrep@gmail.com>
@@ -25,7 +26,7 @@
 
 #include "qzcommon.h"
 
-class QWebEngineContextMenuData;
+class QWebEngineContextMenuRequest;
 
 class WebPage;
 
@@ -34,7 +35,7 @@ class QUPZILLA_EXPORT WebHitTestResult
 public:
     explicit WebHitTestResult(const WebPage *page, const QPoint &pos);
 
-    void updateWithContextMenuData(const QWebEngineContextMenuData &data);
+    void updateWithContextMenuData(const QWebEngineContextMenuRequest &data);
 
     QUrl baseUrl() const;
     QString alternateText() const;

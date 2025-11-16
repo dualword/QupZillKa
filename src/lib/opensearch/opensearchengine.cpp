@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /*
  * Copyright 2009 Jakub Wieczorek <faw217@gmail.com>
  *
@@ -43,7 +44,7 @@
 #include <qlocale.h>
 #include <qnetworkrequest.h>
 #include <qnetworkreply.h>
-#include <qregexp.h>
+#include <qregularexpression.h>
 #include <qstringlist.h>
 
 #include <QUrlQuery>

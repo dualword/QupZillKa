@@ -244,7 +244,7 @@ QString BookmarksToolbarButton::createTooltip() const
     return m_bookmark->title();
 }
 
-void BookmarksToolbarButton::enterEvent(QEvent* event)
+void BookmarksToolbarButton::enterEvent(QEnterEvent* event)
 {
     QPushButton::enterEvent(event);
 

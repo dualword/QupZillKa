@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -160,7 +161,7 @@ void ButtonWithMenu::generateMenu()
 
     foreach (const Item &item, m_items) {
         QVariant variant;
-        variant.setValue<Item>(item);
+        variant.setValue(item);
         m_menu->addAction(item.icon, item.text, this, SLOT(setCurrentItem()))->setData(variant);
     }
 }

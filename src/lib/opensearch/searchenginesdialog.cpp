@@ -174,7 +174,7 @@ SearchEngine SearchEnginesDialog::getEngine(QTreeWidgetItem* item)
 void SearchEnginesDialog::setEngine(QTreeWidgetItem* item, SearchEngine engine)
 {
     QVariant v;
-    v.setValue<SearchEngine>(engine);
+    v.setValue(engine);
     item->setData(0, EngineRole, v);
     item->setText(0, engine.name);
 }

@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2017 David Rosca <nowrep@gmail.com>
@@ -29,14 +30,14 @@ namespace Ui
 class DownloadOptionsDialog;
 }
 
-class QWebEngineDownloadItem;
+class QWebEngineDownloadRequest;
 
 class QUPZILLA_EXPORT DownloadOptionsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit DownloadOptionsDialog(const QString &fileName, QWebEngineDownloadItem *downloadItem, QWidget* parent = 0);
+    explicit DownloadOptionsDialog(const QString &fileName, QWebEngineDownloadRequest *downloadItem, QWidget* parent = 0);
     ~DownloadOptionsDialog();
 
     void showExternalManagerOption(bool show);
@@ -56,7 +57,7 @@ signals:
 private:
     Ui::DownloadOptionsDialog* ui;
 
-    QWebEngineDownloadItem *m_downloadItem;
+    QWebEngineDownloadRequest *m_downloadItem;
     bool m_signalEmited;
 };
 

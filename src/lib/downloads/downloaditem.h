@@ -34,7 +34,7 @@ class DownloadItem;
 }
 
 class QListWidgetItem;
-class QWebEngineDownloadItem;
+class QWebEngineDownloadRequest;
 
 class DownloadManager;
 
@@ -43,7 +43,7 @@ class QUPZILLA_EXPORT DownloadItem : public QWidget
     Q_OBJECT
 
 public:
-    explicit DownloadItem(QListWidgetItem* item, QWebEngineDownloadItem* downloadItem, const QString &path, const QString &fileName, bool openFile, DownloadManager* manager);
+    explicit DownloadItem(QListWidgetItem* item, QWebEngineDownloadRequest* downloadItem, const QString &path, const QString &fileName, bool openFile, DownloadManager* manager);
     bool isDownloading() { return m_downloading; }
     bool isCancelled();
     QTime remainingTime() { return m_remTime; }
@@ -61,7 +61,7 @@ signals:
 private slots:
     void parentResized(const QSize &size);
     void finished();
-    void downloadProgress(qint64 received, qint64 total);
+    void downloadProgress();
     void stop();
     void openFile();
     void openFolder();
@@ -79,7 +79,7 @@ private:
     Ui::DownloadItem* ui;
 
     QListWidgetItem* m_item;
-    QWebEngineDownloadItem* m_download;
+    QWebEngineDownloadRequest* m_download;
     QString m_path;
     QString m_fileName;
     QElapsedTimer m_downTimer;

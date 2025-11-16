@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2024) http://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -284,12 +284,12 @@ void NavigationBar::setSuperMenuVisible(bool visible)
 
 int NavigationBar::layoutMargin() const
 {
-    return m_layout->margin();
+    return m_layout->contentsMargins().left();
 }
 
 void NavigationBar::setLayoutMargin(int margin)
 {
-    m_layout->setMargin(margin);
+    m_layout->setContentsMargins(margin, margin, margin, margin);
 }
 
 int NavigationBar::layoutSpacing() const

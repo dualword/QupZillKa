@@ -55,7 +55,6 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 #include <QColorDialog>
-#include <QDesktopWidget>
 #include <QWebEngineProfile>
 #include <QWebEngineSettings>
 #include <QLibraryInfo>
@@ -194,8 +193,6 @@ Preferences::Preferences(BrowserWindow* window)
         }
     }
 
-    connect(ui->createProfile, SIGNAL(clicked()), this, SLOT(createProfile()));
-    connect(ui->deleteProfile, SIGNAL(clicked()), this, SLOT(deleteProfile()));
     connect(ui->startProfile, SIGNAL(currentIndexChanged(int)), this, SLOT(startProfileIndexChanged(int)));
     startProfileIndexChanged(ui->startProfile->currentIndex());
 
@@ -308,12 +305,14 @@ Preferences::Preferences(BrowserWindow* window)
 
     // Html5Storage
     ui->html5storage->setChecked(settings.value("HTML5StorageEnabled", false).toBool());
-    ui->deleteHtml5storageOnClose->setChecked(settings.value("deleteHTML5StorageOnClose", false).toBool());
+    ui->deleteHtml5storageOnClose->setChecked(settings.value("deleteHTML5StorageOnClose", true).toBool());
+    if (!ui->saveHistory->isChecked()) ui->deleteHistoryOnClose->setEnabled(false);
     connect(ui->html5storage, SIGNAL(toggled(bool)), this, SLOT(allowHtml5storageChanged(bool)));
+
     // Other
     ui->doNotTrack->setChecked(settings.value("DoNotTrack", false).toBool());
     ui->firstParty->setChecked(settings.value("FirstParty", false).toBool());
-    ui->clearRef->setChecked(settings.value("ClearRef", false).toBool());
+    ui->clearRef->setChecked(settings.value("ClearRef", true).toBool());
 
     //CSS Style
     ui->userStyleSheet->setText(settings.value("userStyleSheet", "").toString());
@@ -533,13 +532,12 @@ Preferences::Preferences(BrowserWindow* window)
 
     ui->listWidget->setCurrentRow(currentSettingsPage);
 
-    QDesktopWidget* desktop = QApplication::desktop();
     QSize s = size();
-    if (desktop->availableGeometry(this).size().width() < s.width()) {
-        s.setWidth(desktop->availableGeometry(this).size().width() - 50);
+    if (screen()->availableGeometry().size().width() < s.width()) {
+        s.setWidth(screen()->availableGeometry().size().width() - 50);
     }
-    if (desktop->availableGeometry(this).size().height() < s.height()) {
-        s.setHeight(desktop->availableGeometry(this).size().height() - 50);
+    if (screen()->availableGeometry().size().height() < s.height()) {
+        s.setHeight(screen()->availableGeometry().size().height() - 50);
     }
     resize(s);
 
@@ -831,9 +829,6 @@ void Preferences::deleteProfile()
 void Preferences::startProfileIndexChanged(int index)
 {
     const bool current = ui->startProfile->itemText(index) == ProfileManager::currentProfile();
-
-    ui->deleteProfile->setEnabled(!current);
-    ui->cannotDeleteActiveProfileLabel->setText(current ? tr("Note: You cannot delete active profile.") : QString());
 }
 
 void Preferences::closeEvent(QCloseEvent* event)

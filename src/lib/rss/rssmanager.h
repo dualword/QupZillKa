@@ -155,7 +155,7 @@ private:
 class WorkerThread : public QObject {
     Q_OBJECT
 public:
-    WorkerThread(QObject *p = nullptr) : QObject(p){cname = QString::number( reinterpret_cast<int>(this));};
+    WorkerThread(QObject *p = nullptr) : QObject(p){cname = QString::number(reinterpret_cast<qintptr>(this));};
     void run() {        
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", cname);
         db.setDatabaseName(DataPaths::currentProfilePath() + QLatin1String("/rss.db"));

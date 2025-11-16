@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2014-2018 David Rosca <nowrep@gmail.com>
@@ -63,7 +64,7 @@ private:
     void init();
     QString createTooltip() const;
 
-    void enterEvent(QEvent* event);
+    void enterEvent(QEnterEvent* event);
     void leaveEvent(QEvent* event);
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);

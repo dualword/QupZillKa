@@ -31,7 +31,6 @@
 #include <QWidget>
 #include <QApplication>
 #include <QSslCertificate>
-#include <QDesktopWidget>
 #include <QUrl>
 #include <QIcon>
 #include <QFileIconProvider>
@@ -42,6 +41,7 @@
 #include <QMessageBox>
 #include <QUrlQuery>
 #include <QPainterPath>
+#include <QScreen>
 
 #ifdef QZ_WS_X11
 #include <QX11Info>
@@ -112,7 +112,7 @@ QByteArray QzTools::readAllFileByteContents(const QString &filename)
 
 void QzTools::centerWidgetOnScreen(QWidget* w)
 {
-    const QRect screen = QApplication::desktop()->screenGeometry(w);
+    const QRect screen = w->screen()->geometry();
     const QRect size = w->geometry();
     w->move((screen.width() - size.width()) / 2, (screen.height() - size.height()) / 2);
 }
@@ -146,6 +146,8 @@ bool QzTools::removeFile(const QString &fullFileName)
 
 void QzTools::removeDir(const QString &d)
 {
+    if(d.length() <= 0) return;
+
     QDir dir(d);
     if (dir.exists()) {
         const QFileInfoList list = dir.entryInfoList();

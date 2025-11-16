@@ -32,7 +32,7 @@ class DownloadManager;
 class QUrl;
 class QNetworkAccessManager;
 class QListWidgetItem;
-class QWebEngineDownloadItem;
+class QWebEngineDownloadRequest;
 class QWinTaskbarButton;
 
 class DownloadItem;
@@ -64,7 +64,7 @@ public:
 
     void loadSettings();
 
-    void download(QWebEngineDownloadItem *downloadItem);
+    void download(QWebEngineDownloadRequest *downloadItem);
 
     int downloadsCount() const;
     int activeDownloadsCount() const {return m_activeDownloadsCount;};

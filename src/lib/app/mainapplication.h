@@ -32,7 +32,7 @@ class QMenu;
 class QWebEngineProfile;
 class QWebEngineSettings;
 class QNetworkAccessManager;
-class QWebEngineDownloadItem;
+class QWebEngineDownloadRequest;
 
 class History;
 class AutoFill;
@@ -148,7 +148,7 @@ private slots:
     void onFocusChanged();
     void runDeferredPostLaunchActions();
 
-    void downloadRequested(QWebEngineDownloadItem *download);
+    void downloadRequested(QWebEngineDownloadRequest *download);
 
 private:
     enum PostLaunchAction {

@@ -246,7 +246,7 @@ void HistoryMenu::init()
     act->setShortcut(QKeySequence(Qt::ALT + Qt::Key_Home));
 
     act = addAction(QIcon::fromTheme("deep-history", QIcon(":/icons/menu/history.svg")), tr("History &Manager"), this, SLOT(showHistoryManager()));
-    act->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_H));
+    act->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_H));
 
     addSeparator();
 

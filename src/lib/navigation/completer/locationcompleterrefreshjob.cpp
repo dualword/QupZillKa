@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2014-2018 David Rosca <nowrep@gmail.com>
@@ -40,7 +41,7 @@ LocationCompleterRefreshJob::LocationCompleterRefreshJob(const QString &searchSt
     m_watcher = new QFutureWatcher<void>(this);
     connect(m_watcher, SIGNAL(finished()), this, SLOT(slotFinished()));
 
-    QFuture<void> future = QtConcurrent::run(this, &LocationCompleterRefreshJob::runJob);
+    QFuture<void> future = QtConcurrent::run( &LocationCompleterRefreshJob::runJob, this);
     m_watcher->setFuture(future);
 }
 

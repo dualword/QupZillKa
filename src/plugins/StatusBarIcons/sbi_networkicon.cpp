@@ -1,4 +1,4 @@
-/* QupZillKa (2023) http://github.com/dualword/QupZillKa License:GNU GPL*/
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * StatusBarIcons - Extra icons in statusbar for QupZilla
 * Copyright (C) 2013-2017 David Rosca <nowrep@gmail.com>
@@ -25,30 +25,24 @@
 #include "useragentmanager.h"
 
 #include <QMenu>
-#include <QNetworkConfigurationManager>
 
 SBI_NetworkIcon::SBI_NetworkIcon(BrowserWindow* window)
-    : SBI_Icon(window)
-    , m_networkConfiguration(new QNetworkConfigurationManager(this))
-{
+    : SBI_Icon(window) {
     setObjectName(QSL("sbi_networkicon"));
     setCursor(Qt::PointingHandCursor);
-
-    onlineStateChanged(m_networkConfiguration->isOnline());
-
-    connect(m_networkConfiguration, SIGNAL(onlineStateChanged(bool)), this, SLOT(onlineStateChanged(bool)));
+    onlineStateChanged(QNetworkInformation::instance()->reachability());
+    connect(QNetworkInformation::instance(), &QNetworkInformation::reachabilityChanged, this, &SBI_NetworkIcon::onlineStateChanged);
     connect(this, SIGNAL(clicked(QPoint)), this, SLOT(showMenu(QPoint)));
 }
 
-void SBI_NetworkIcon::onlineStateChanged(bool online)
+void SBI_NetworkIcon::onlineStateChanged(QNetworkInformation::Reachability state)
 {
-    if (online) {
+    if (state == QNetworkInformation::Reachability::Online) {
         setPixmap(QIcon(":sbi/data/network-online.png").pixmap(16));
     }
     else {
         setPixmap(QIcon(":sbi/data/network-offline.png").pixmap(16));
     }
-
     updateToolTip();
 }
 
@@ -100,10 +94,9 @@ void SBI_NetworkIcon::updateToolTip()
     QString tooltip (MainApplication::instance()->userAgentManager()->globalUserAgent());
     tooltip.append(tr("<br/><br/>Shows network status and manages proxy<br/><br/><b>Network:</b><br/>%1<br/><br/><b>Proxy:</b><br/>%2"));
 
-    if (m_networkConfiguration->isOnline()) {
+    if (QNetworkInformation::instance()->reachability() == QNetworkInformation::Reachability::Online) {
         tooltip = tooltip.arg(tr("Connected"));
-    }
-    else {
+    } else {
         tooltip = tooltip.arg(tr("Offline"));
     }
 
@@ -128,7 +121,7 @@ void SBI_NetworkIcon::updateToolTip()
     setToolTip(tooltip);
 }
 
-void SBI_NetworkIcon::enterEvent(QEvent* event)
+void SBI_NetworkIcon::enterEvent(QEnterEvent* event)
 {
     updateToolTip();
 

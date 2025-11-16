@@ -1,4 +1,4 @@
-/* QupZillKa (2021) http://github.com/dualword/QupZillKa License:GNU GPL*/
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * GreaseMonkey plugin for QupZilla
 * Copyright (C) 2012-2018 David Rosca <nowrep@gmail.com>
@@ -183,7 +183,7 @@ void GM_Manager::disableScript(GM_Script* script)
     m_disabledScripts.append(script->fullName());
 
     QWebEngineScriptCollection *collection = mApp->webProfile()->scripts();
-    collection->remove(collection->findScript(script->fullName()));
+    collection->remove(collection->find(script->fullName()).first());
 }
 
 bool GM_Manager::addScript(GM_Script* script)
@@ -211,7 +211,7 @@ bool GM_Manager::removeScript(GM_Script* script, bool removeFile)
     m_scripts.removeOne(script);
 
     QWebEngineScriptCollection *collection = mApp->webProfile()->scripts();
-    collection->remove(collection->findScript(script->fullName()));
+    collection->remove(collection->find(script->fullName()).first());
 
     m_disabledScripts.removeOne(script->fullName());
 
@@ -279,7 +279,7 @@ void GM_Manager::scriptChanged()
         return;
 
     QWebEngineScriptCollection *collection = mApp->webProfile()->scripts();
-    collection->remove(collection->findScript(script->fullName()));
+    collection->remove(collection->find(script->fullName()).first());
     collection->insert(script->webScript());
 }
 

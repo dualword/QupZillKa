@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -35,7 +36,7 @@
 #include <QMessageBox>
 #include <QFileIconProvider>
 #include <QDesktopServices>
-#include <QWebEngineDownloadItem>
+#include <QWebEngineDownloadRequest>
 
 #ifdef Q_OS_WIN
 #include "Shlwapi.h"
@@ -43,7 +44,7 @@
 
 //#define DOWNMANAGER_DEBUG
 
-DownloadItem::DownloadItem(QListWidgetItem *item, QWebEngineDownloadItem* downloadItem, const QString &path, const QString &fileName, bool openFile, DownloadManager* manager)
+DownloadItem::DownloadItem(QListWidgetItem *item, QWebEngineDownloadRequest* downloadItem, const QString &path, const QString &fileName, bool openFile, DownloadManager* manager)
     : QWidget()
     , ui(new Ui::DownloadItem)
     , m_item(item)
@@ -79,8 +80,9 @@ DownloadItem::DownloadItem(QListWidgetItem *item, QWebEngineDownloadItem* downlo
 
 void DownloadItem::startDownloading()
 {
-    connect(m_download, &QWebEngineDownloadItem::finished, this, &DownloadItem::finished);
-    connect(m_download, &QWebEngineDownloadItem::downloadProgress, this, &DownloadItem::downloadProgress);
+    connect(m_download, &QWebEngineDownloadRequest::isFinishedChanged, this, &DownloadItem::finished);
+    connect(m_download, &QWebEngineDownloadRequest::totalBytesChanged, this, &DownloadItem::downloadProgress);
+    connect(m_download, &QWebEngineDownloadRequest::receivedBytesChanged, this, &DownloadItem::downloadProgress);
 
     m_downloading = true;
     m_downTimer.start();
@@ -119,16 +121,16 @@ void DownloadItem::finished()
     QString host = m_download->url().host();
 
     switch (m_download->state()) {
-    case QWebEngineDownloadItem::DownloadCompleted:
+    case QWebEngineDownloadRequest::DownloadCompleted:
         success = true;
-        ui->downloadInfo->setText(tr("Done - %1 (%2)").arg(host, QDateTime::currentDateTime().toString(Qt::DefaultLocaleShortDate)));
+        ui->downloadInfo->setText(tr("Done - %1 (%2)").arg(host, QDateTime::currentDateTime().toString(Qt::ISODate)));
         break;
 
-    case QWebEngineDownloadItem::DownloadInterrupted:
+    case QWebEngineDownloadRequest::DownloadInterrupted:
         ui->downloadInfo->setText(tr("Error - %1").arg(host));
         break;
 
-    case QWebEngineDownloadItem::DownloadCancelled:
+    case QWebEngineDownloadRequest::DownloadCancelled:
         ui->downloadInfo->setText(tr("Cancelled - %1").arg(host));
         break;
 
@@ -149,11 +151,13 @@ void DownloadItem::finished()
     emit downloadFinished(true);
 }
 
-void DownloadItem::downloadProgress(qint64 received, qint64 total)
+void DownloadItem::downloadProgress()
 {
 #ifdef DOWNMANAGER_DEBUG
     qDebug() << __FUNCTION__ << received << total;
 #endif
+    qint64 received = m_download->receivedBytes();
+    qint64 total = m_download->totalBytes();
     qint64 currentValue = 0;
     qint64 totalValue = 0;
     if (total > 0) {

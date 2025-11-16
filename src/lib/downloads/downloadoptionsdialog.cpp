@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2017 David Rosca <nowrep@gmail.com>
@@ -21,9 +22,9 @@
 
 #include <QClipboard>
 #include <QMimeDatabase>
-#include <QWebEngineDownloadItem>
+#include <QWebEngineDownloadRequest>
 
-DownloadOptionsDialog::DownloadOptionsDialog(const QString &fileName, QWebEngineDownloadItem *downloadItem, QWidget *parent)
+DownloadOptionsDialog::DownloadOptionsDialog(const QString &fileName, QWebEngineDownloadRequest *downloadItem, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::DownloadOptionsDialog)
     , m_downloadItem(downloadItem)

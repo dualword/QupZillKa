@@ -184,7 +184,7 @@ void MainMenu::savePageAs()
 
 void MainMenu::sendLink()
 {
-    const QUrl mailUrl = QUrl::fromEncoded("mailto:%20?body=" + QUrl::toPercentEncoding(m_window->weView()->url().toEncoded()) + "&subject=" + QUrl::toPercentEncoding(m_window->weView()->title()));
+    const QUrl mailUrl = QUrl::fromEncoded(QByteArray("mailto:%20?body=" + QUrl::toPercentEncoding(m_window->weView()->url().toEncoded()) + "&subject=" + QUrl::toPercentEncoding(m_window->weView()->title())));
     QDesktopServices::openUrl(mailUrl);
 }
 

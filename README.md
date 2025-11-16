@@ -23,8 +23,11 @@ Source code: https://github.com/dualword/QupZillKa/
 <img src="adblock.png" height="100" width="150" alt="AdBlock" title="AdBlock"/>
 </p>
 
+<br/>
 <hr>
-<center>AI-generated logo:<center/>
+
+AI-generated logo:  
+
 <p align="middle">
 <img src="logo1.png" height="100" width="100" alt="AI-generated logo" title="AI-generated logo"/>
 </p>

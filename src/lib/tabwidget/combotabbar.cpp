@@ -27,8 +27,8 @@
 #include <QIcon>
 #include <QHBoxLayout>
 #include <QStylePainter>
-#include <QStyleOptionTabV3>
-#include <QStyleOptionTabBarBaseV2>
+#include <QStyleOptionTab>
+#include <QStyleOptionTabBarBase>
 #include <QPropertyAnimation>
 #include <QScrollArea>
 #include <QTimer>
@@ -682,7 +682,7 @@ void ComboTabBar::paintEvent(QPaintEvent* ev)
 
     // This is needed to apply style sheets
     QStyleOption option;
-    option.init(this);
+    option.initFrom(this);
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Widget, &option, &p, this);
 
@@ -1230,7 +1230,7 @@ void TabBarHelper::initStyleBaseOption(QStyleOptionTabBarBase *optTabBase, QTabB
     tabOverlap.shape = tabbar->shape();
     int overlap = tabbar->style()->pixelMetric(QStyle::PM_TabBarBaseOverlap, &tabOverlap, tabbar);
     QWidget* theParent = tabbar->parentWidget();
-    optTabBase->init(tabbar);
+    optTabBase->initFrom(tabbar);
     optTabBase->shape = tabbar->shape();
     optTabBase->documentMode = tabbar->documentMode();
     if (theParent && overlap > 0) {
@@ -1708,35 +1708,35 @@ void TabBarScrollWidget::scrollStart()
 void TabBarScrollWidget::scrollByWheel(QWheelEvent* event)
 {
     event->accept();
-
+    //TODO:
     // Check if direction has changed from last time
-    if (m_totalDeltas * event->delta() < 0) {
+    if (m_totalDeltas * event->angleDelta().x() < 0) {
         m_totalDeltas = 0;
     }
 
-    m_totalDeltas += event->delta();
+    m_totalDeltas += event->angleDelta().x();
 
     // Slower scrolling for horizontal wheel scrolling
-    if (event->orientation() == Qt::Horizontal) {
+    //if (event->orientation() == Qt::Horizontal) {
         if (event->angleDelta().x() > 0) {
             scrollToLeft();
         }
         else if (event->angleDelta().x() < 0) {
             scrollToRight();
         }
-        return;
-    }
+        //return;
+    //}
 
     // Faster scrolling with control modifier
-    if (event->orientation() == Qt::Vertical && event->modifiers() == Qt::ControlModifier) {
-        if (event->delta() > 0) {
+    //if (event->orientation() == Qt::Vertical && event->modifiers() == Qt::ControlModifier) {
+        if (event->angleDelta().y() > 0) {
             scrollToLeft(10);
         }
-        else if (event->delta() < 0) {
+        else if (event->angleDelta().y() < 0) {
             scrollToRight(10);
         }
-        return;
-    }
+        //return;
+   //}
 
     // Fast scrolling with just wheel scroll
     int factor = qMax(qRound(m_scrollBar->pageStep() / 1.5), m_scrollBar->singleStep());
@@ -1822,7 +1822,7 @@ QSize CloseButton::sizeHint() const
     return QSize(width, height);
 }
 
-void CloseButton::enterEvent(QEvent* event)
+void CloseButton::enterEvent(QEnterEvent* event)
 {
     if (isEnabled()) {
         update();
@@ -1844,7 +1844,7 @@ void CloseButton::paintEvent(QPaintEvent*)
 {
     QPainter p(this);
     QStyleOption opt;
-    opt.init(this);
+    opt.initFrom(this);
     opt.state |= QStyle::State_AutoRaise;
 
     // update raised state on scrolling

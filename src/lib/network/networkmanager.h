@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -54,7 +55,7 @@ protected:
 private:
     NetworkUrlInterceptor *m_urlInterceptor;
     ExtensionSchemeManager *m_extensionScheme;
-    QHash<QString, QWebEngineCertificateError::Error> m_ignoredSslErrors;
+    QHash<QString, QWebEngineCertificateError::Type> m_ignoredSslErrors;
 };
 
 #endif // NETWORKMANAGER_H

@@ -40,7 +40,7 @@
 #include <QShortcut>
 #include <QStandardPaths>
 #include <QWebEngineHistory>
-#include <QWebEngineDownloadItem>
+#include <QWebEngineDownloadRequest>
 
 #ifdef Q_OS_WIN
 #include <QtWin>
@@ -248,7 +248,7 @@ void DownloadManager::clearList()
     emit downloadsCountChanged();
 }
 
-void DownloadManager::download(QWebEngineDownloadItem *downloadItem)
+void DownloadManager::download(QWebEngineDownloadRequest *downloadItem)
 {
     closeDownloadTab(downloadItem->url());
 
@@ -257,7 +257,7 @@ void DownloadManager::download(QWebEngineDownloadItem *downloadItem)
 
     QString fileName = downloadItem->downloadFileName();
 
-    const bool forceAsk = downloadItem->savePageFormat() != QWebEngineDownloadItem::UnknownSaveFormat
+    const bool forceAsk = downloadItem->savePageFormat() != QWebEngineDownloadRequest::UnknownSaveFormat
             || downloadItem->isSavePageDownload();
 
     if (m_useExternalManager) {
@@ -266,7 +266,7 @@ void DownloadManager::download(QWebEngineDownloadItem *downloadItem)
         enum Result { Open = 1, Save = 2, ExternalManager = 3, SavePage = 4, Unknown = 0 };
         Result result = Unknown;
 
-        if (downloadItem->savePageFormat() != QWebEngineDownloadItem::UnknownSaveFormat) {
+        if (downloadItem->savePageFormat() != QWebEngineDownloadRequest::UnknownSaveFormat) {
             // Save Page requested
             result = SavePage;
         } else if (downloadItem->isSavePageDownload()) {
@@ -313,17 +313,17 @@ void DownloadManager::download(QWebEngineDownloadItem *downloadItem)
                 Settings().setValue(QSL("DownloadManager/lastDownloadPath"), m_lastDownloadPath);
                 m_lastDownloadOption = SaveFile;
 
-                QWebEngineDownloadItem::SavePageFormat format = QWebEngineDownloadItem::UnknownSaveFormat;
+                QWebEngineDownloadRequest::SavePageFormat format = QWebEngineDownloadRequest::UnknownSaveFormat;
 
                 if (selectedFilter == mhtml) {
-                    format = QWebEngineDownloadItem::MimeHtmlSaveFormat;
+                    format = QWebEngineDownloadRequest::MimeHtmlSaveFormat;
                 } else if (selectedFilter == htmlSingle) {
-                    format = QWebEngineDownloadItem::SingleHtmlSaveFormat;
+                    format = QWebEngineDownloadRequest::SingleHtmlSaveFormat;
                 } else if (selectedFilter == htmlComplete) {
-                    format = QWebEngineDownloadItem::CompleteHtmlSaveFormat;
+                    format = QWebEngineDownloadRequest::CompleteHtmlSaveFormat;
                 }
 
-                if (format != QWebEngineDownloadItem::UnknownSaveFormat) {
+                if (format != QWebEngineDownloadRequest::UnknownSaveFormat) {
                     downloadItem->setSavePageFormat(format);
                 }
             }

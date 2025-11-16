@@ -41,7 +41,8 @@
 #include <QCompleter>
 #include <QStringListModel>
 #include <QContextMenuEvent>
-#include <QStyleOptionFrameV3>
+#include <QStyleOptionFrame>
+#include <QPainter>
 
 LocationBar::LocationBar(QWidget *parent)
     : LineEdit(parent)

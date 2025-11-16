@@ -22,6 +22,7 @@
 #include "webpage.h"
 
 #include <QPaintEvent>
+#include <QPainter>
 
 WebScrollBar::WebScrollBar(Qt::Orientation orientation, WebView *view)
     : QScrollBar(orientation)

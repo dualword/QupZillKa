@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2017 David Rosca <nowrep@gmail.com>
@@ -38,7 +39,7 @@ public:
             icon = b;
         }
 
-        bool operator==(const Item &a) {
+        bool operator==(const Item &a) const{
             return (a.text == text) && (a.icon.pixmap(16).toImage() == icon.pixmap(16).toImage());
         }
 

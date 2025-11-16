@@ -20,6 +20,7 @@
 #define SESSIONMANAGER_H
 
 #include "qzcommon.h"
+#include "QObject"
 
 class QAction;
 class QMenu;

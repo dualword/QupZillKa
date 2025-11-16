@@ -24,6 +24,7 @@
 #include <QWebEngineFullScreenRequest>
 #include <QVector>
 #include <QElapsedTimer>
+ #include <QPrinter>
 
 #include "qzcommon.h"
 
@@ -89,7 +90,7 @@ private slots:
 private:
     void setupWebChannelForUrl(const QUrl &url);
     bool acceptNavigationRequest(const QUrl &url, NavigationType type, bool isMainFrame) Q_DECL_OVERRIDE;
-    bool certificateError(const QWebEngineCertificateError &error) Q_DECL_OVERRIDE;
+    bool certificateError(const QWebEngineCertificateError &error);
     QStringList chooseFiles(FileSelectionMode mode, const QStringList &oldFiles, const QStringList &acceptedMimeTypes) Q_DECL_OVERRIDE;
     QWebEnginePage* createWindow(QWebEnginePage::WebWindowType type) Q_DECL_OVERRIDE;
 

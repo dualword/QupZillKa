@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - WebKit based browser
 * Copyright (C) 2010-2016 David Rosca <nowrep@gmail.com>
@@ -18,7 +19,7 @@
 #include "progressbar.h"
 
 #include <QStylePainter>
-#include <QStyleOptionProgressBarV2>
+#include <QStyleOptionProgressBar>
 
 ProgressBar::ProgressBar(QWidget* parent)
     : QWidget(parent)
@@ -47,6 +48,7 @@ void ProgressBar::initStyleOption(QStyleOptionProgressBar* option)
     option->minimum = 0;
     option->maximum = 100;
     option->progress = m_value;
+    option->state = QStyle::State_Enabled;
     option->textAlignment = Qt::AlignLeft;
     option->textVisible = false;
 }
@@ -57,6 +59,7 @@ void ProgressBar::paintEvent(QPaintEvent*)
 
     QStyleOptionProgressBar opt;
     initStyleOption(&opt);
+    opt.state |= QStyle::State_Horizontal;
 
     paint.drawControl(QStyle::CE_ProgressBar, opt);
 

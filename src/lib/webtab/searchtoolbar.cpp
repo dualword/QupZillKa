@@ -25,6 +25,7 @@
 
 #include <QKeyEvent>
 #include <QShortcut>
+#include <QWebEngineFindTextResult>
 
 SearchToolBar::SearchToolBar(WebView* view, QWidget* parent)
     : QWidget(parent)
@@ -122,7 +123,8 @@ void SearchToolBar::setText(const QString &text)
 void SearchToolBar::searchText(const QString &text)
 {
     QPointer<SearchToolBar> guard = this;
-    m_view->findText(text, m_findFlags, [=](bool found) {
+    m_view->findText(text, m_findFlags, [=](const QWebEngineFindTextResult& result) {
+        bool found = result.numberOfMatches() > 0;
         if (!guard) {
             return;
         }

@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - WebKit based browser
 * Copyright (C) 2010-2014  David Rosca <nowrep@gmail.com>
@@ -157,5 +158,5 @@ void Updater::downCompleted()
 
 void Updater::downloadNewVersion()
 {
-    m_window->tabWidget()->addView(QUrl::fromEncoded(QByteArray(Qz::WWWADDRESS) + QByteArray("/download")), tr("Update"), Qz::NT_NotSelectedTab);
+    m_window->tabWidget()->addView(QUrl::fromEncoded(QByteArray(QByteArray(Qz::WWWADDRESS) + QByteArray("/download"))), tr("Update"), Qz::NT_NotSelectedTab);
 }

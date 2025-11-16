@@ -37,6 +37,7 @@
 #include <QMessageBox>
 #include <QVBoxLayout>
 #include <QSaveFile>
+#include <QActionGroup>
 
 SessionManager::SessionManager(QObject* parent)
     : QObject(parent)

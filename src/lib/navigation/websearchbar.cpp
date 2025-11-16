@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -40,8 +41,7 @@
 #include <QClipboard>
 #include <QContextMenuEvent>
 
-WebSearchBar_Button::WebSearchBar_Button(QWidget* parent)
-    : ClickableLabel(parent)
+WebSearchBar_Button::WebSearchBar_Button(QWidget* parent) : ClickableLabel(parent)
 {
     setObjectName("websearchbar-searchbutton");
     setCursor(QCursor(Qt::PointingHandCursor));
@@ -53,8 +53,7 @@ void WebSearchBar_Button::contextMenuEvent(QContextMenuEvent* event)
     event->accept();
 }
 
-WebSearchBar::WebSearchBar(BrowserWindow* window)
-    : LineEdit(window)
+WebSearchBar::WebSearchBar(BrowserWindow* window) : LineEdit(window)
     , m_window(window)
     , m_reloadingEngines(false)
 {
@@ -178,7 +177,7 @@ void WebSearchBar::setupEngines()
         item.icon = en.icon;
         item.text = en.name;
         QVariant v;
-        v.setValue<SearchEngine>(en);
+        v.setValue(en);
         item.userData = v;
 
         m_boxSearchType->addItem(item);

@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - WebKit based browser
 * Copyright (C) 2010-2014  David Rosca <nowrep@gmail.com>
@@ -42,7 +43,7 @@ public:
             return !url.isEmpty();
         }
 
-        bool operator==(const Page &other) {
+        bool operator==(const Page &other) const{
             return (this->title == other.title &&
                     this->url == other.url);
         }

@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -23,6 +24,7 @@
 #include "bookmarksicon.h"
 #include "autofillicon.h"
 #include "webpage.h"
+#include <QPainter>
 
 class QUPZILLA_EXPORT PopupSiteIcon : public QWidget
 {

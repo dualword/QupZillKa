@@ -50,7 +50,7 @@ bool HtmlExporter::exportBookmarks(BookmarkItem* root)
     }
 
     QTextStream stream(&file);
-    stream.setCodec("UTF-8");
+    stream.setEncoding(QStringConverter::Utf8);
 
     stream << "<!DOCTYPE NETSCAPE-Bookmark-file-1>" << Qt::endl;
     stream << "<!-- This is an automatically generated file." << Qt::endl;

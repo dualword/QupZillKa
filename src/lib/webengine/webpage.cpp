@@ -119,7 +119,7 @@ WebPage::~WebPage()
 
 WebView *WebPage::view() const
 {
-    return static_cast<WebView*>(QWebEnginePage::view());
+    return static_cast<WebView*>(QWebEngineView::forPage(this));
 }
 
 bool WebPage::execPrintPage(QPrinter *printer, int timeout)
@@ -128,7 +128,7 @@ bool WebPage::execPrintPage(QPrinter *printer, int timeout)
     bool result = false;
     QTimer::singleShot(timeout, loop.data(), &QEventLoop::quit);
 
-    print(printer, [loop, &result](bool res) {
+    connect(view(), &QWebEngineView::printFinished, [loop, &result](bool res) {
         if (loop && loop->isRunning()) {
             result = res;
             loop->quit();

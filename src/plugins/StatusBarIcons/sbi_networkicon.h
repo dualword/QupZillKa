@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * StatusBarIcons - Extra icons in statusbar for QupZilla
 * Copyright (C) 2013-2014  David Rosca <nowrep@gmail.com>
@@ -18,11 +19,10 @@
 #ifndef SBI_NETWORKICON_H
 #define SBI_NETWORKICON_H
 
-#include <QNetworkAccessManager>
-
 #include "sbi_icon.h"
 
-class QNetworkConfigurationManager;
+#include <QNetworkAccessManager>
+#include <QNetworkInformation>
 
 class SBI_NetworkIcon : public SBI_Icon
 {
@@ -32,7 +32,7 @@ public:
     explicit SBI_NetworkIcon(BrowserWindow* window);
 
 private slots:
-    void onlineStateChanged(bool online);
+    void onlineStateChanged(QNetworkInformation::Reachability);
     void showDialog();
 
     void showMenu(const QPoint &pos);
@@ -40,9 +40,7 @@ private slots:
 
 private:
     void updateToolTip();
-    void enterEvent(QEvent* event);
-
-    QNetworkConfigurationManager* m_networkConfiguration;
+    void enterEvent(QEnterEvent* event);
 };
 
 #endif // SBI_NETWORKICON_H
