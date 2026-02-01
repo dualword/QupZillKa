@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - WebKit based browser
 * Copyright (C) 2010-2015  David Rosca <nowrep@gmail.com>
@@ -25,6 +26,7 @@
 
 class Menu;
 class LoadRequest;
+class WebInspector;
 
 class QUPZILLA_EXPORT PopupWebView : public WebView
 {
@@ -40,11 +42,13 @@ public:
     void requestFullScreen(bool enable) Q_DECL_OVERRIDE;
 
 public slots:
+    void inspectElement();
 
 private:
     void _contextMenuEvent(QContextMenuEvent *event) Q_DECL_OVERRIDE;
 
     Menu* m_menu;
+    QPointer<WebInspector> m_inspector;
 };
 
 #endif // POPUPWEBVIEW_H

@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -32,6 +32,7 @@
 #include "qzsettings.h"
 #include "enhancedmenu.h"
 #include "locationbar.h"
+#include "webinspector.h"
 #include "scripts.h"
 #include "webhittestresult.h"
 #include "webscrollbarmanager.h"
@@ -74,12 +75,14 @@ WebView::WebView(QWidget* parent)
     if (parentWidget()) {
         parentWidget()->installEventFilter(this);
     }
+    WebInspector::registerView(this);
 
 }
 
 WebView::~WebView()
 {
     mApp->plugins()->emitWebPageDeleted(m_page);
+    WebInspector::unregisterView(this);
     WebScrollBarManager::instance()->removeWebView(this);
 }
 
@@ -180,6 +183,7 @@ void WebView::load(const QUrl &url)
 
     if (!m_firstLoad) {
         m_firstLoad = true;
+        WebInspector::pushView(this);
     }
 }
 

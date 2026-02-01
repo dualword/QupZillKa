@@ -1,4 +1,4 @@
-/* QupZillKa (2021) http://github.com/dualword/QupZillKa License:GNU GPL*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 
 #ifndef SRC_PLUGINS_USERAGENTMANAGER_UAMANAGERPLUGIN_H_
 #define SRC_PLUGINS_USERAGENTMANAGER_UAMANAGERPLUGIN_H_
@@ -32,7 +32,7 @@ private slots:
 
 private:
     AbstractButtonInterface* createStatusBarIcon(BrowserWindow* mainWindow);
-    QHash<BrowserWindow*, AbstractButtonInterface*> m_SBIcons;
+    QHash<BrowserWindow*, AbstractButtonInterface*> m_icons;
     QPointer<Preferences> m_preferences;
 };
 

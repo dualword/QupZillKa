@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2014-2018 David Rosca <nowrep@gmail.com>
@@ -32,8 +32,8 @@
 #include "rssmanager.h"
 #include "browsinglibrary.h"
 #include "clearprivatedata.h"
-#include "qzsettings.h"
 #include "pluginproxy.h"
+#include "webinspector.h"
 #include "sessionmanager.h"
 #include "statusbar.h"
 #include "datapaths.h"
@@ -312,6 +312,11 @@ void MainMenu::showDownloadManager()
     DownloadManager* m = mApp->downloadManager();
     m->show();
     m->raise();
+}
+
+void MainMenu::toggleWebInspector()
+{
+    callSlot("toggleWebInspector");
 }
 
 void MainMenu::showCookieManager()
@@ -605,11 +610,12 @@ void MainMenu::init()
     m_menuTools = new QMenu(tr("&Tools"));
     connect(m_menuTools, SIGNAL(aboutToShow()), this, SLOT(aboutToShowToolsMenu()));
 
-    ADD_ACTION("Tools/RssReader", m_menuTools, QIcon(), tr("RSS &Reader"), SLOT(showRssManager()), "");
-    ADD_ACTION("Tools/DownloadManager", m_menuTools, QIcon(), tr("&Download Manager"), SLOT(showDownloadManager()), "Ctrl+Y");
-    ADD_ACTION("Tools/CookiesManager", m_menuTools, QIcon(), tr("&Cookies Manager"), SLOT(showCookieManager()), "");
+    ADD_ACTION("Tools/RssReader", m_menuTools, QIcon::fromTheme(QSL("text-html")), tr("RSS &Reader"), SLOT(showRssManager()), "");
+    ADD_ACTION("Tools/DownloadManager", m_menuTools, QIcon::fromTheme(QSL("text-html")), tr("&Download Manager"), SLOT(showDownloadManager()), "Ctrl+Y");
+    ADD_ACTION("Tools/CookiesManager", m_menuTools, QIcon::fromTheme(QSL("text-html")), tr("&Cookies Manager"), SLOT(showCookieManager()), "");
+    ADD_ACTION("Tools/WebInspector", m_menuTools, QIcon::fromTheme(QSL("text-html")), tr("Developer Tool&s"), SLOT(toggleWebInspector()), "Ctrl+Shift+I");
     ADD_ACTION("Tools/ClearRecentHistory", m_menuTools, QIcon::fromTheme(QSL("edit-clear")), tr("Clear &History"), SLOT(showClearRecentHistoryDialog()), "Ctrl+Shift+Del");
-    ADD_ACTION("Tools/Optimizer", m_menuTools, QIcon(), tr("&Optimize database"),SLOT(showOptimizer()), "");
+    ADD_ACTION("Tools/Optimizer", m_menuTools, QIcon::fromTheme(QSL("edit-clear")), tr("&Optimize database"),SLOT(showOptimizer()), "");
     m_menuTools->addSeparator();
     ADD_ACTION("Tools/SiteInfo", m_menuTools, QIcon::fromTheme(QSL("dialog-information")), tr("Site &Info"), SLOT(showSiteInfo()), "Ctrl+I");
     action->setShortcutContext(Qt::WidgetShortcut);
@@ -622,9 +628,9 @@ void MainMenu::init()
     // Help menu
     m_menuHelp = new QMenu(tr("&Help"));
 
-    ADD_ACTION("Help/InfoAboutApp", m_menuHelp, QIcon::fromTheme(QSL("help-contents")), tr("Information about application"), SLOT(showInfoAboutApp()), "");
-    ADD_ACTION("Help/ConfigInfo", m_menuHelp, QIcon(), tr("Configuration Information"), SLOT(showConfigInfo()), "");
-    ADD_ACTION("Help/GPUInfo", m_menuHelp, QIcon(), tr("GPU Information"), SLOT(showGPUInfo()), "");
+    ADD_ACTION("Help/InfoAboutApp", m_menuHelp, QIcon::fromTheme(QSL("dialog-information")), tr("Information about application"), SLOT(showInfoAboutApp()), "");
+    ADD_ACTION("Help/ConfigInfo", m_menuHelp, QIcon::fromTheme(QSL("dialog-information")), tr("Configuration Information"), SLOT(showConfigInfo()), "");
+    ADD_ACTION("Help/GPUInfo", m_menuHelp, QIcon::fromTheme(QSL("dialog-information")), tr("GPU Information"), SLOT(showGPUInfo()), "");
     #ifndef Q_OS_MACOS
     	m_menuHelp->addSeparator();
     	m_menuHelp->addAction(m_actions[QSL("Standard/About")]);

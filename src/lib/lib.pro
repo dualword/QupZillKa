@@ -5,7 +5,7 @@ TEMPLATE = lib
 
 DEFINES *= QUPZILLA_SHAREDLIBRARY
 
-CONFIG += c++14
+CONFIG += c++17
 
 include(../defines.pri)
 include(../../translations/translations.pri)
@@ -220,6 +220,7 @@ SOURCES += \
     webengine/javascript/externaljsobject.cpp \
     webengine/loadrequest.cpp \
     webengine/webhittestresult.cpp \
+    webengine/webhittestresult.cpp \
     webengine/webinspector.cpp \
     webengine/webpage.cpp \
     webengine/webview.cpp \
@@ -409,7 +410,7 @@ HEADERS  += \
     webengine/javascript/autofilljsobject.h \
     webengine/javascript/externaljsobject.h \
     webengine/loadrequest.h \
-    webengine/webhittestresult.cpp \
+    webengine/webhittestresult.h \
     webengine/webinspector.h \
     webengine/webpage.h \
     webengine/webview.h \

@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - WebKit based browser
 * Copyright (C) 2010-2014  David Rosca <nowrep@gmail.com>
@@ -218,6 +218,7 @@ public:
                                                 if (xml.qualifiedName() == QLatin1String("item")) {
 
                         QDateTime d = QDateTime::fromString(pubDate, Qt::RFC2822Date);
+                        if(!d.isValid()) d = QDateTime::fromString(pubDate, "ddd, dd MMM yyyy hh:mm:ss t");
                         if(!d.isValid()) d = QDateTime::fromString(pubDate, Qt::ISODate);
                          if (d > dt) {
 {QSqlQuery query(db);
@@ -236,11 +237,9 @@ public:
                                                                  query.bindValue(10, mUrl);
                                                                  query.bindValue(11, mType);
                                                                  query.bindValue(12, mtUrl);
-                                                                 query.exec();
+                                                                 if (query.exec()) count++;
                                                                  query.finish();}
-                                                                 count++;
                          } else {b = false;}
-
 
                                                     titleString.clear();
                                                     strLink.clear();
@@ -304,11 +303,12 @@ public:
                                                  }else if ( (xml.name() == QLatin1String("link"))
                                                             & (xml.attributes().value("rel") == "alternate")) {
                                                       strLink = xml.attributes().value("href").toString();
-                                                  }
+                                                  }else if (xml.name() == QLatin1String("link")) {
+                                                     strLink = xml.attributes().value("href").toString();
+                                                 }
                                                 currentTag = xml.qualifiedName().toString();
                                             } else if (xml.isEndElement()) {
                                                 if (xml.qualifiedName() == QLatin1String("entry")) {
-
                                         QDateTime d = QDateTime::fromString(pubDate, Qt::ISODate);
                                          if (d > dt) {
                                              {QSqlQuery query(db);
@@ -324,7 +324,7 @@ public:
                                                     query.bindValue(7, encLenght);
                                                     query.bindValue(8, encType);
                                                     query.bindValue(9, 1);
-                                                    query.exec();
+                                                    if (query.exec()) count++;
                                                     query.finish();
                                                     titleString.clear();
                                                     strLink.clear();
@@ -332,8 +332,6 @@ public:
                                                     pubDate.clear();
                                                     guid.clear();
                                                     encUrl.clear(); encType.clear(); encLenght.clear();}
-                                                    count++;
-
                                         } else {b = false;}
                                                 }
                                             } else if (xml.isCharacters() && !xml.isWhitespace()) {

@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -30,6 +31,7 @@ class QSplitter;
 
 class BrowserWindow;
 class TabbedWebView;
+class WebInspector;
 class LocationBar;
 class TabIcon;
 class TabBar;
@@ -116,6 +118,10 @@ public:
     void closeTab();
     void moveTab(int to);
 
+    bool haveInspector() const;
+    void showWebInspector(bool inspectElement = false);
+    void toggleWebInspector();
+
     void showSearchToolBar(const QString &searchText = QString());
 
     bool isRestored() const;
@@ -155,6 +161,7 @@ private:
     QSplitter* m_splitter;
 
     TabbedWebView* m_webView;
+    WebInspector* m_inspector;
     LocationBar* m_locationBar;
     TabIcon* m_tabIcon;
     QWidget *m_notificationWidget;

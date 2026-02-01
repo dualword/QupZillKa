@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 
 #include "UAManagerPlugin.h"
 #include "abstractbuttoninterface.h"
@@ -75,20 +75,20 @@ void UAManagerPlugin::showSettings() {
     settings.beginGroup("Browser-View-Settings");
     settings.setValue("settingsDialogPage", 12);
     settings.endGroup();
-	BrowserWindow* w = m_SBIcons.keys()[0];
+    BrowserWindow* w = m_icons.keys()[0];
 	if (!m_preferences) m_preferences = new Preferences(w);
 	m_preferences->open();
 }
 
 AbstractButtonInterface* UAManagerPlugin::createStatusBarIcon(BrowserWindow* mainWindow) {
-    if (m_SBIcons.contains(mainWindow)) {
-        return m_SBIcons.value(mainWindow);
+    if (m_icons.contains(mainWindow)) {
+        return m_icons.value(mainWindow);
     }
 
     UAM_Button *icon = new UAM_Button(this);
     icon->setIcon(QIcon(QSL(":/useragentmanager/data/UAplugin.png")));
     connect(icon, &AbstractButtonInterface::clicked, this, &UAManagerPlugin::showSettings);
-    m_SBIcons.insert(mainWindow, icon);
+    m_icons.insert(mainWindow, icon);
     updateSettings();
     return icon;
 }
@@ -98,13 +98,13 @@ void UAManagerPlugin::mainWindowCreated(BrowserWindow* window) {
 }
 
 void UAManagerPlugin::mainWindowDeleted(BrowserWindow* window) {
-    window->statusBar()->removeButton(m_SBIcons.value(window));
-    delete m_SBIcons.value(window);
-    m_SBIcons.remove(window);
+    window->statusBar()->removeButton(m_icons.value(window));
+    delete m_icons.value(window);
+    m_icons.remove(window);
 }
 
 void UAManagerPlugin::updateSettings() {
-    foreach (AbstractButtonInterface* icon, m_SBIcons.values()) {
+    foreach (AbstractButtonInterface* icon, m_icons.values()) {
 //        Settings settings;
 //        settings.beginGroup("Web-Browser-Settings");
 //        icon->setToolTip(settings.value("UserAgent", QString()).toString());

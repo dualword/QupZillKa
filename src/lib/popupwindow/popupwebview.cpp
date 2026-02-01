@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2017 David Rosca <nowrep@gmail.com>
@@ -25,6 +26,7 @@
 #include "loadrequest.h"
 #include "webpage.h"
 #include "webhittestresult.h"
+#include "webinspector.h"
 
 #include <QContextMenuEvent>
 
@@ -71,12 +73,33 @@ void PopupWebView::requestFullScreen(bool enable)
         parentWidget()->showNormal();
 }
 
+void PopupWebView::inspectElement()
+{
+    if (!WebInspector::isEnabled())
+        return;
+
+    if (m_inspector) {
+        triggerPageAction(QWebEnginePage::InspectElement);
+        return;
+    }
+
+    m_inspector = new WebInspector;
+    m_inspector->setView(this);
+    m_inspector->inspectElement();
+    m_inspector->show();
+}
+
 void PopupWebView::_contextMenuEvent(QContextMenuEvent *event)
 {
     m_menu->clear();
 
     WebHitTestResult hitTest = page()->hitTestContent(event->pos());
     createContextMenu(m_menu, hitTest);
+
+    if (WebInspector::isEnabled()) {
+        m_menu->addSeparator();
+        m_menu->addAction(tr("Inspect Element"), this, SLOT(inspectElement()));
+    }
 
     if (!m_menu->isEmpty()) {
         // Prevent choosing first option with double rightclick

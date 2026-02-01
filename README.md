@@ -7,7 +7,6 @@ Plugins:
  - AdBlock
  - GreaseMonkey / Userscripts ([UserScripts.md](userscripts/))
  - StatusBar Icons (JavaScript on/off, network status, current user agent)
- - User Agent Manager (random user agent from a file)
  - Network Traffic Monitor
  - Screenshot
 

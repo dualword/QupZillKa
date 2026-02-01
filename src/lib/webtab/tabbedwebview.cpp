@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -30,6 +31,7 @@
 #include "enhancedmenu.h"
 #include "locationbar.h"
 #include "webhittestresult.h"
+#include "webinspector.h"
 
 #include <QHostInfo>
 #include <QContextMenuEvent>
@@ -63,6 +65,14 @@ BrowserWindow* TabbedWebView::browserWindow() const
 void TabbedWebView::setBrowserWindow(BrowserWindow* window)
 {
     m_window = window;
+}
+
+void TabbedWebView::inspectElement()
+{
+    if (m_webTab->haveInspector())
+        triggerPageAction(QWebEnginePage::InspectElement);
+    else
+        m_webTab->showWebInspector(true);
 }
 
 WebTab* TabbedWebView::webTab() const
@@ -189,6 +199,11 @@ void TabbedWebView::_contextMenuEvent(QContextMenuEvent *event)
 
     WebHitTestResult hitTest = page()->hitTestContent(event->pos());
     createContextMenu(m_menu, hitTest);
+
+    if (WebInspector::isEnabled()) {
+        m_menu->addSeparator();
+        m_menu->addAction(tr("Inspect Element"), this, SLOT(inspectElement()));
+    }
 
     if (!m_menu->isEmpty()) {
         // Prevent choosing first option with double rightclick

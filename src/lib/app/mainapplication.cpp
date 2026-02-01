@@ -901,7 +901,6 @@ void MainApplication::loadSettings()
     webSettings->setAttribute(QWebEngineSettings::PluginsEnabled, settings.value("allowPlugins", false).toBool());
     webSettings->setAttribute(QWebEngineSettings::PdfViewerEnabled, settings.value("allowPdf", false).toBool());
     webSettings->setAttribute(QWebEngineSettings::WebGLEnabled, settings.value("enableWebGL", false).toBool());
-    webSettings->setAttribute(QWebEngineSettings::Accelerated2dCanvasEnabled, settings.value("enableWebGL", false).toBool());
     webSettings->setAttribute(QWebEngineSettings::JavascriptEnabled, settings.value("allowJavaScript", false).toBool());
     webSettings->setAttribute(QWebEngineSettings::JavascriptCanOpenWindows, settings.value("allowJavaScriptOpenWindow", false).toBool());
     webSettings->setAttribute(QWebEngineSettings::JavascriptCanAccessClipboard, settings.value("allowJavaScriptAccessClipboard", false).toBool());
