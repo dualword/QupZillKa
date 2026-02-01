@@ -220,7 +220,6 @@ SOURCES += \
     webengine/javascript/externaljsobject.cpp \
     webengine/loadrequest.cpp \
     webengine/webhittestresult.cpp \
-    webengine/webhittestresult.cpp \
     webengine/webinspector.cpp \
     webengine/webpage.cpp \
     webengine/webview.cpp \
