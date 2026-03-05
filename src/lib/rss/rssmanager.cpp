@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - WebKit based browser
 * Copyright (C) 2010-2014  David Rosca <nowrep@gmail.com>
@@ -179,7 +179,6 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
                 reloadFeeds(item->data(0, rId).toInt());
             });
             menu.addAction(newAct);
-            menu.addSeparator();
 
             newAct = new QAction(tr("Delete News in this Folder"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
@@ -194,6 +193,17 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
                 ui->tree1->itemClicked(item,0);
             });
             menu.addAction(newAct);
+
+            newAct = new QAction(tr("Toggle Enable/Disable Updates"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [&](bool b){
+                bool tmp = !selectValue(db, "active", "feed", "fid", item->data(0, rId)).toBool();
+                updateValue("feed", "active", tmp, "fid", item->data(0, rId));
+                for (int i =0; i < item->childCount(); i++){
+                    tmp ? item->child(i)->setForeground(0, QBrush(Qt::black)) :item->child(i)->setForeground(0, QBrush(Qt::gray));
+                }
+            });
+            menu.addAction(newAct);
+            menu.addSeparator();
 
             newAct = new QAction(tr("Delete Folder"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
@@ -217,15 +227,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
                 beginToLoadSlot(QUrl(item->toolTip(0)));
             });
             menu.addAction(newAct);
-            menu.addSeparator();
-            newAct = new QAction(tr("Toggle Enable/Disable Updates"), this);
-            connect(newAct, QOverload<bool>::of(&QAction::triggered), [&](bool b){
-                bool tmp = !selectValue(db, "active", "feed", "id", item->data(0, rId)).toBool();
-                updateValue("feed", "active", tmp, "id", item->data(0, rId));
-                tmp ? item->setForeground(0, QBrush(Qt::black)) :item->setForeground(0, QBrush(Qt::gray));
-            });
-            menu.addAction(newAct);
-            menu.addSeparator();
+
             newAct = new QAction(tr("Delete News"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
                 QMessageBox::StandardButton btn = QMessageBox::warning(this, tr("Confirmation"),
@@ -239,6 +241,30 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
                 ui->tree1->itemClicked(item,0);
             });
             menu.addAction(newAct);
+
+            newAct = new QAction(tr("Toggle Enable/Disable Updates"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [&](bool b){
+                bool tmp = !selectValue(db, "active", "feed", "id", item->data(0, rId)).toBool();
+                updateValue("feed", "active", tmp, "id", item->data(0, rId));
+                tmp ? item->setForeground(0, QBrush(Qt::black)) :item->setForeground(0, QBrush(Qt::gray));
+            });
+            menu.addAction(newAct);
+
+            newAct = new QAction(tr("Copy link to clipboard"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                QClipboard *cb = QGuiApplication::clipboard();
+                cb->setText(item->toolTip(0));
+            });
+            menu.addAction(newAct);
+
+            newAct = new QAction(tr("Reload All"), this);
+            connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                updateValue("feed", "updated", QVariant(), "id", item->data(0, rId));
+                beginToLoadSlot(QUrl(item->toolTip(0)));
+            });
+            menu.addAction(newAct);
+
+            menu.addSeparator();
 
             newAct = new QAction(tr("Delete Feed"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
@@ -635,9 +661,9 @@ void RSSManager::beginToLoadSlot(const QUrl &url)
 {
     QDateTime tmp(QDateTime::fromString(selectValue(db, "lm","feed","url", QVariant(url)).toString()));
         QList<QPair<QString, QString>> list;
-    if(!tmp.isNull() ) {
-            list << QPair<QString, QString>("If-Modified-Since", tmp.toString("ddd, dd MMM yyyy HH:mm:ss").append(" GMT"));
-    }
+    // if(!tmp.isNull() ) {
+    //         list << QPair<QString, QString>("If-Modified-Since", tmp.toString("ddd, dd MMM yyyy HH:mm:ss").append(" GMT"));
+    // }
 
     FollowRedirectReply* reply = new FollowRedirectReply(url, m_networkManager, list);
     connect(reply, SIGNAL(finished()), this, SLOT(finished()));

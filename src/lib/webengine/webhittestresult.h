@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - QtWebEngine based browser
 * Copyright (C) 2015-2016 David Rosca <nowrep@gmail.com>
@@ -39,6 +39,7 @@ public:
 
     QUrl baseUrl() const;
     QString alternateText() const;
+    QString selectedText() const;
     QRect boundingRect() const;
     QUrl imageUrl() const;
     bool isContentEditable() const;
@@ -59,6 +60,7 @@ private:
     bool m_isNull;
     QUrl m_baseUrl;
     QString m_alternateText;
+    QString m_selectedText;
     QRect m_boundingRect;
     QUrl m_imageUrl;
     bool m_isContentEditable;

@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2017 David Rosca <nowrep@gmail.com>
@@ -47,14 +47,13 @@ public:
     bool eventFilter(QObject* obj, QEvent* event);
 
 public Q_SLOTS:
-    void setText(const QString &text);
-    void searchText(const QString &text);
+    void setText(const QString&);
+    void searchText(const QString&);
     void updateFindFlags();
     void caseSensitivityChanged();
-
+    void showResult(const QWebEngineFindTextResult&);
     void findNext();
     void findPrevious();
-
     void close();
 
 private:

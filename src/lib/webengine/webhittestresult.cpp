@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2015-2018 David Rosca <nowrep@gmail.com>
@@ -100,6 +100,7 @@ void WebHitTestResult::updateWithContextMenuData(const QWebEngineContextMenuRequ
     m_linkUrl = data.linkUrl();
     m_isContentEditable = data.isContentEditable();
     m_isContentSelected = !data.selectedText().isEmpty();
+    m_selectedText = data.selectedText();
 
     switch (data.mediaType()) {
     case QWebEngineContextMenuRequest::MediaTypeImage:
@@ -124,6 +125,11 @@ QUrl WebHitTestResult::baseUrl() const
 QString WebHitTestResult::alternateText() const
 {
     return m_alternateText;
+}
+
+QString WebHitTestResult::selectedText() const
+{
+    return m_selectedText;
 }
 
 QRect WebHitTestResult::boundingRect() const

@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -42,6 +42,7 @@ SearchToolBar::SearchToolBar(WebView* view, QWidget* parent)
     ui->previous->setIcon(IconProvider::instance()->standardIcon(QStyle::SP_ArrowUp));
     ui->previous->setShortcut(QKeySequence("Ctrl+Shift+G"));
 
+    connect(view->page(), &QWebEnginePage::findTextFinished, this, &SearchToolBar::showResult);
     connect(ui->closeButton, SIGNAL(clicked()), this, SLOT(close()));
     connect(ui->lineEdit, SIGNAL(textEdited(QString)), this, SLOT(findNext()));
     connect(ui->lineEdit, SIGNAL(returnPressed()), this, SLOT(findNext()));
@@ -56,6 +57,10 @@ SearchToolBar::SearchToolBar(WebView* view, QWidget* parent)
     connect(findPreviousAction, SIGNAL(activated()), this, SLOT(findPrevious()));
 
     parent->installEventFilter(this);
+}
+
+void SearchToolBar::showResult(const QWebEngineFindTextResult &result){
+    ui->lblRes->setText(QString(QString::number(result.activeMatch()).append("/").append(QString::number(result.numberOfMatches()))));
 }
 
 void SearchToolBar::showMinimalInPopupWindow()
