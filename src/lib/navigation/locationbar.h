@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -32,6 +33,7 @@ class TabbedWebView;
 class BookmarksIcon;
 class SiteIcon;
 class GoIcon;
+class RssIcon;
 class AutoFillIcon;
 class BookmarkItem;
 
@@ -81,6 +83,7 @@ private slots:
 
     void setPrivacyState(bool state);
     void setGoIconVisible(bool state);
+    void setRssIconVisible(bool state);
 
     void showCompletion(const QString &completion, bool completeDomain);
     void showDomainCompletion(const QString &completion);
@@ -116,11 +119,13 @@ private:
     BookmarksIcon* m_bookmarkIcon;
     GoIcon* m_goIcon;
     SiteIcon* m_siteIcon;
+    RssIcon* m_rssIcon;
     AutoFillIcon* m_autofillIcon;
 
     BrowserWindow* m_window;
     TabbedWebView* m_webView;
 
+    bool m_rssIconVisible;
     bool m_holdingAlt;
     int m_oldTextLength;
     int m_currentTextLength;

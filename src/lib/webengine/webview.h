@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -50,6 +51,7 @@ public:
     int loadingProgress() const;
 
     bool backgroundActivity() const;
+    bool hasRss() const;
 
     // Set zoom level (0 - 17)
     int zoomLevel() const;
@@ -78,6 +80,7 @@ signals:
     void viewportResized(QSize);
     void showNotification(QWidget*);
     void privacyChanged(bool);
+    void rssChanged(bool);
     void zoomLevelChanged(int);
     void backgroundActivityChanged(bool);
 
@@ -172,7 +175,7 @@ private slots:
     void addSpeedDial();
     void configureSpeedDial();
     void reloadAllSpeedDials();
-
+    void checkRss();
     void toggleMediaPause();
     void toggleMediaMute();
 
@@ -193,6 +196,9 @@ private:
     WheelHelper m_wheelHelper;
 
     static bool s_forceContextMenuOnMouseRelease;
+
+    bool m_hasRss;
+    bool m_rssChecked;
 };
 
 #endif // WEBVIEW_H

@@ -60,6 +60,8 @@ WebView::WebView(QWidget* parent)
     , m_backgroundActivity(false)
     , m_page(0)
     , m_firstLoad(false)
+    , m_hasRss(false)
+    , m_rssChecked(false)
 {
     connect(this, &QWebEngineView::loadStarted, this, &WebView::slotLoadStarted);
     connect(this, &QWebEngineView::loadProgress, this, &WebView::slotLoadProgress);
@@ -235,6 +237,37 @@ void WebView::setZoomLevel(int level)
     m_currentZoomLevel = level;
     applyZoom();
 }
+
+bool WebView::hasRss() const
+{
+    return m_hasRss;
+}
+
+void WebView::checkRss()
+{
+    if (m_rssChecked) {
+         return;
+    }
+
+    m_rssChecked = true;
+
+    QString script =
+        "(function() {"
+        "  var links = document.querySelectorAll(\"link[type='application/rss+xml'], link[type='application/atom+xml']\");"
+        "  var urls = [];"
+        "  for (var i = 0; i < links.length; i++) {"
+        "    urls.push(links[i].href);"
+        "  }"
+        "  return urls.join('\\n');"
+        "})();";
+
+    page()->runJavaScript(script, [=](const QVariant& var){
+        auto list = var.toString().split('\n', Qt::SkipEmptyParts);
+        m_hasRss = list.size() != 0;
+        if(list.size() > 0) emit rssChanged(m_hasRss);
+    });
+}
+
 
 QPointF WebView::mapToViewport(const QPointF &pos) const
 {
@@ -417,6 +450,10 @@ void WebView::slotLoadStarted()
     if (title(/*allowEmpty*/true).isEmpty()) {
         emit titleChanged(title());
     }
+
+    m_rssChecked = false;
+    emit rssChanged(false);
+
 }
 
 void WebView::slotLoadProgress(int progress)
@@ -429,12 +466,16 @@ void WebView::slotLoadProgress(int progress)
     if (!qFuzzyCompare(zoomFactor(), zoomLevels().at(m_currentZoomLevel) / 100.0)) {
         applyZoom();
     }
+
+    // if (m_progress > 60) {
+    //     checkRss();
+    // }
 }
 
 void WebView::slotLoadFinished(bool ok)
 {
     m_progress = 100;
-
+    checkRss();
     if (ok)
         mApp->history()->addHistoryEntry(this);
 }

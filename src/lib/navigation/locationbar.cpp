@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -28,6 +28,7 @@
 #include "bookmarkstoolbar.h"
 #include "siteicon.h"
 #include "goicon.h"
+#include "rssicon.h"
 #include "downicon.h"
 #include "qztools.h"
 #include "iconprovider.h"
@@ -64,10 +65,12 @@ LocationBar::LocationBar(QWidget *parent)
     m_goIcon = new GoIcon(this);
     m_siteIcon = new SiteIcon(this);
     m_autofillIcon = new AutoFillIcon(this);
+    m_rssIcon = new RssIcon(this);
     DownIcon* down = new DownIcon(this);
 
     addWidget(m_siteIcon, LineEdit::LeftSide);
     addWidget(m_autofillIcon, LineEdit::RightSide);
+    addWidget(m_rssIcon, LineEdit::RightSide);
     addWidget(m_bookmarkIcon, LineEdit::RightSide);
     addWidget(m_goIcon, LineEdit::RightSide);
     addWidget(down, LineEdit::RightSide);
@@ -109,7 +112,7 @@ LocationBar::LocationBar(QWidget *parent)
     // Hide icons by default
     m_goIcon->setVisible(qzSettings->alwaysShowGoIcon);
     m_autofillIcon->hide();
-
+    m_rssIcon->hide();
     QTimer::singleShot(0, this, SLOT(updatePlaceHolderText()));
 }
 
@@ -134,6 +137,7 @@ void LocationBar::setWebView(TabbedWebView* view)
 {
     m_webView = view;
 
+    m_rssIcon->setWebView(m_webView);
     m_bookmarkIcon->setWebView(m_webView);
     m_siteIcon->setWebView(m_webView);
     m_autofillIcon->setWebView(m_webView);
@@ -142,6 +146,7 @@ void LocationBar::setWebView(TabbedWebView* view)
     connect(m_webView, SIGNAL(loadProgress(int)), SLOT(loadProgress(int)));
     connect(m_webView, SIGNAL(loadFinished(bool)), SLOT(loadFinished()));
     connect(m_webView, SIGNAL(urlChanged(QUrl)), this, SLOT(showUrl(QUrl)));
+    connect(m_webView, SIGNAL(rssChanged(bool)), this, SLOT(setRssIconVisible(bool)));
     connect(m_webView, SIGNAL(privacyChanged(bool)), this, SLOT(setPrivacyState(bool)));
 }
 
@@ -303,6 +308,16 @@ LocationBar::LoadAction LocationBar::loadAction(const QString &text)
     action.searchEngine = searchEngine();
     action.loadRequest = mApp->searchEnginesManager()->searchResult(searchEngine(), t);
     return action;
+}
+
+void LocationBar::setRssIconVisible(bool state)
+{
+    if(state){
+        m_rssIcon->show();
+    }else{
+        m_rssIcon->hide();
+    }
+    updateTextMargins();
 }
 
 void LocationBar::refreshTextFormat()

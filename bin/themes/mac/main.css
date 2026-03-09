@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /*************************************
  * Mac Theme                         *
  * Author: nowrep                    *
@@ -200,6 +201,12 @@ IconProvider
 #locationbar-bookmarkicon[bookmarked="true"]
 {
     qproperty-pixmap: url(images/star-a.png);
+}
+
+#locationbar-rss-icon
+{
+    qproperty-pixmap: url(images/rss.svg);
+    qproperty-fixedsize: 16px 16px;
 }
 
 #locationbar-siteicon

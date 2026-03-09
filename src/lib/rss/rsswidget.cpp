@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - WebKit based browser
 * Copyright (C) 2010-2014  David Rosca <nowrep@gmail.com>
@@ -25,8 +26,8 @@
 
 #include <QToolTip>
 #include <QPushButton>
-//#include <QWebFrame>
 #include <QSqlQuery>
+#include <QTextEdit>
 
 RSSWidget::RSSWidget(WebView* view, QWidget* parent)
     : LocationBarPopup(parent)
@@ -35,52 +36,25 @@ RSSWidget::RSSWidget(WebView* view, QWidget* parent)
 {
     ui->setupUi(this);
 
-//    QWebFrame* frame = m_view->page()->mainFrame();
-//    QWebElementCollection links = frame->findAllElements("link[type=\"application/rss+xml\"]");
+    QString script =
+        "(function() {"
+        "  var arr = document.querySelectorAll(\"link[type='application/rss+xml'], link[type='application/atom+xml'] \");"
+        "  var urls = [];"
+        "  for (var i = 0; i < arr.length; i++) {"
+        "    urls.push(arr[i].href);"
+        "  }"
+        "  return urls.join('\\n');"
+        "})();";
 
-//    // Make sure RSS feeds fit into a window, in case there is a lot of feeds from one page
-//    // See #906
-//    int cols = links.count() / 10 == 0 ? 1 : links.count() / 10;
-//    int row = 0;
-
-//    for (int i = 0; i < links.count(); i++) {
-//        QWebElement element = links.at(i);
-//        QString title = element.attribute("title");
-//        const QUrl url = QUrl::fromEncoded(element.attribute("href").toUtf8());
-//        if (url.isEmpty()) {
-//            continue;
-//        }
-
-//        if (title.isEmpty()) {
-//            title = tr("Untitled feed");
-//        }
-
-//        QPushButton* button = new QPushButton(this);
-//        button->setIcon(QIcon(":icons/other/feed.png"));
-//        button->setStyleSheet("text-align:left");
-//        button->setText(title);
-//        button->setProperty("rss-url", url);
-//        button->setProperty("rss-title", title);
-
-//        if (!isRssFeedAlreadyStored(url)) {
-//            button->setFlat(true);
-//            button->setToolTip(url.toString());
-//        }
-//        else {
-//            button->setFlat(false);
-//            button->setEnabled(false);
-//            button->setToolTip(tr("You already have this feed."));
-//        }
-
-//        int pos = i % cols > 0 ? (i % cols) * 2 : 0;
-
-//        ui->gridLayout->addWidget(button, row, pos);
-//        connect(button, SIGNAL(clicked()), this, SLOT(addRss()));
-
-//        if (i % cols == cols - 1) {
-//            row++;
-//        }
-//    }
+    auto txt = new QTextEdit(this);
+    txt->setReadOnly(true);
+    m_view->page()->runJavaScript(script, [=](const QVariant& var){
+        auto list = var.toString().split('\n', Qt::SkipEmptyParts);
+        foreach (const QString &url, list) {
+            txt->append(url);
+        }
+    });
+    ui->gridLayout->addWidget(txt, 0, 0);
 }
 
 void RSSWidget::addRss()

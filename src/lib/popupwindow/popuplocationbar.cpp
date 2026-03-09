@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -23,6 +23,7 @@
 #include "iconprovider.h"
 #include "bookmarksicon.h"
 #include "autofillicon.h"
+#include "rssicon.h"
 #include "webpage.h"
 #include <QPainter>
 
@@ -77,6 +78,7 @@ void PopupLocationBar::setView(PopupWebView* view)
 
     m_bookmarkIcon->setWebView(m_view);
     m_autofillIcon->setWebView(m_view);
+    connect(m_view, SIGNAL(rssChanged(bool)), this, SLOT(showRSSIcon(bool)));
 }
 
 void PopupLocationBar::startLoading()
@@ -109,4 +111,9 @@ void PopupLocationBar::showUrl(const QUrl &url)
 void PopupLocationBar::showSiteIcon()
 {
     m_siteIcon->setIcon(m_view->icon());
+}
+
+void PopupLocationBar::showRSSIcon(bool state)
+{
+    updateTextMargins();
 }

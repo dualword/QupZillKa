@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /*************************************
  * Linux Theme                       *
  * Author: David Rosca               *
@@ -140,6 +141,12 @@ IconProvider
 {
     qproperty-themeIcon: "rating";
     qproperty-fallbackIcon: url(images/star-a.svg);
+    qproperty-fixedsize: 16px 16px;
+}
+
+#locationbar-rss-icon
+{
+    qproperty-pixmap: url(images/rss.svg);
     qproperty-fixedsize: 16px 16px;
 }
 

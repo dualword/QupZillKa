@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - WebKit based browser
 * Copyright (C) 2010-2016  David Rosca <nowrep@gmail.com>
@@ -27,6 +28,7 @@ class PopupSiteIcon;
 class PopupWebView;
 class AutoFillIcon;
 class BookmarksIcon;
+class RssIcon;
 
 class QUPZILLA_EXPORT PopupLocationBar : public LineEdit
 {
@@ -46,6 +48,7 @@ public:
 public slots:
     void showUrl(const QUrl &url);
     void showSiteIcon();
+    void showRSSIcon(bool state);
 
 private:
     PopupWebView* m_view;
@@ -53,6 +56,7 @@ private:
     PopupSiteIcon* m_siteIcon;
     AutoFillIcon* m_autofillIcon;
     BookmarksIcon* m_bookmarkIcon;
+    RssIcon* m_rssIcon;
 };
 
 #endif // POPUPLOCATIONBAR_H
