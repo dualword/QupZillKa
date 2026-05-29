@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -287,5 +287,14 @@ void NetworkManager::shutdown()
 QNetworkReply *NetworkManager::createRequest(QNetworkAccessManager::Operation op, const QNetworkRequest &request, QIODevice *outgoingData)
 {
     QNetworkRequest req = request;
+    req.setAttribute(QNetworkRequest::Http2AllowedAttribute, false);
+    if(!mApp->userAgentManager()->globalUserLang().isNull())
+        req.setRawHeader(QByteArrayLiteral("Accept-Language"), mApp->userAgentManager()->globalUserLang().toUtf8());
+    if(!mApp->userAgentManager()->globalUserAccept().isNull())
+        req.setRawHeader(QByteArrayLiteral("Accept"), mApp->userAgentManager()->globalUserAccept().toUtf8());
+    if(!mApp->userAgentManager()->globalUserAcceptEnc().isNull())
+        req.setRawHeader(QByteArrayLiteral("Accept-Encoding"), mApp->userAgentManager()->globalUserAcceptEnc().toUtf8());
+    req.setHeader(QNetworkRequest::UserAgentHeader, mApp->userAgentManager()->globalUserAgent().toUtf8());
+    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
     return QNetworkAccessManager::createRequest(op, req, outgoingData);
 }

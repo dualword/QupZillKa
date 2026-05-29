@@ -661,9 +661,9 @@ void RSSManager::beginToLoadSlot(const QUrl &url)
 {
     QDateTime tmp(QDateTime::fromString(selectValue(db, "lm","feed","url", QVariant(url)).toString()));
         QList<QPair<QString, QString>> list;
-    // if(!tmp.isNull() ) {
-    //         list << QPair<QString, QString>("If-Modified-Since", tmp.toString("ddd, dd MMM yyyy HH:mm:ss").append(" GMT"));
-    // }
+    if(!tmp.isNull() ) {
+            list << QPair<QString, QString>("If-Modified-Since", tmp.toString("ddd, dd MMM yyyy HH:mm:ss").append(" GMT"));
+    }
 
     FollowRedirectReply* reply = new FollowRedirectReply(url, m_networkManager, list);
     connect(reply, SIGNAL(finished()), this, SLOT(finished()));

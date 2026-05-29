@@ -156,7 +156,8 @@ class WorkerThread : public QObject {
     Q_OBJECT
 public:
     WorkerThread(QObject *p = nullptr) : QObject(p){cname = QString::number(reinterpret_cast<qintptr>(this));};
-    void run() {        
+    void run() {
+        QThread::msleep(QRandomGenerator::global()->bounded(100, 1000));
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", cname);
         db.setDatabaseName(DataPaths::currentProfilePath() + QLatin1String("/rss.db"));
         db.setConnectOptions("QSQLITE_BUSY_TIMEOUT=10000");

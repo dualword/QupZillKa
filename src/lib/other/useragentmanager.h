@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -36,6 +37,12 @@ public:
 
     QString globalUserAgent() const;
     QString defaultUserAgent() const;
+    QString globalUserLang() const {return m_globalUserLang;};
+    void globalUserLang(const QString& lang) {m_globalUserLang = lang;};
+    QString globalUserAccept() const {return m_globalUserAccept;};
+    void globalUserAccept(const QString& p) {m_globalUserAccept = p;};
+    QString globalUserAcceptEnc() const {return m_globalUserAcceptEnc;};
+    void globalUserAcceptEnc(const QString& p) {m_globalUserAcceptEnc = p;};
 
     bool usePerDomainUserAgents() const;
     QHash<QString, QString> perDomainUserAgentsList() const;
@@ -43,6 +50,9 @@ public:
 private:
     QString m_globalUserAgent;
     QString m_defaultUserAgent;
+    QString m_globalUserLang;
+    QString m_globalUserAccept;
+    QString m_globalUserAcceptEnc;
 
     bool m_usePerDomainUserAgent;
     QHash<QString, QString> m_userAgentsList;
