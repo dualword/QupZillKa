@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -675,13 +675,13 @@ void MainApplication::quitApplication()
     m_plugins->shutdown();
     delete m_rssManager;
 
-    for (BrowserWindow *window : qAsConst(m_windows)) {
+    for (BrowserWindow *window : std::as_const(m_windows)) {
         emit window->aboutToClose();
     }
 
     m_isClosing = true;
 
-    for (BrowserWindow *window : qAsConst(m_windows)) {
+    for (BrowserWindow *window : std::as_const(m_windows)) {
         window->close();
     }
 
@@ -726,7 +726,7 @@ QByteArray MainApplication::saveState() const
 {
     RestoreData restoreData;
     restoreData.windows.reserve(m_windows.count());
-    for (BrowserWindow *window : qAsConst(m_windows)) {
+    for (BrowserWindow *window : std::as_const(m_windows)) {
         restoreData.windows.append(BrowserWindow::SavedWindow(window));
     }
 

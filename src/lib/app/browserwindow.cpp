@@ -124,7 +124,7 @@ BrowserWindow::SavedWindow::SavedWindow(BrowserWindow *window)
 
 bool BrowserWindow::SavedWindow::isValid() const
 {
-    for (const WebTab::SavedTab &tab : qAsConst(tabs)) {
+    for (const WebTab::SavedTab &tab : std::as_const(tabs)) {
         if (!tab.isValid()) {
             return false;
         }

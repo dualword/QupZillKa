@@ -60,6 +60,7 @@ class DtItem : public QStyledItemDelegate {
 public:
     DtItem(QObject *p = nullptr) : QStyledItemDelegate(p) {};
     QString displayText(const QVariant &val, const QLocale &locale) const {
+        Q_UNUSED(locale)
         return QDateTime::fromString(val.toString(), Qt::ISODate).toLocalTime().toString("dd MMM yyyy HH:mm:ss");
     }
 };
@@ -71,6 +72,7 @@ public:
 
 protected:
     bool acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool isMainFrame) override{
+        Q_UNUSED(isMainFrame)
         if (type == QWebEnginePage::NavigationTypeLinkClicked) {
             mApp->getWindow()->tabWidget()->addView(url, qzSettings->newTabPosition);
             return false;
@@ -78,6 +80,7 @@ protected:
         return true;
     }
     QWebEnginePage* createWindow(QWebEnginePage::WebWindowType type) {
+        Q_UNUSED(type)
         int index =mApp->getWindow()->tabWidget()->addView(QUrl(), Qz::NT_CleanNotSelectedTab);
         TabbedWebView* view = mApp->getWindow()->weView(index);
         view->setPage(new WebPage());
@@ -96,7 +99,7 @@ class RSSManager;
 class BrowserWindow;
 class FollowRedirectReply;
 class NetworkManager;
-class QUPZILLA_EXPORT RSSManager : public QWidget
+class QUPZILLA_EXPORT RSSManager final: public QWidget
 {
     Q_OBJECT
 

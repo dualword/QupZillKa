@@ -1,3 +1,4 @@
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * GreaseMonkey plugin for QupZilla
 * Copyright (C) 2012-2018 David Rosca <nowrep@gmail.com>
@@ -333,7 +334,7 @@ void GM_Script::downloadIcon()
 
 void GM_Script::downloadRequires()
 {
-    for (const QString &url : qAsConst(m_require)) {
+    for (const QString &url : std::as_const(m_require)) {
         if (m_manager->requireScripts({url}).isEmpty()) {
             GM_Downloader *downloader = new GM_Downloader(QUrl(url), m_manager, GM_Downloader::DownloadRequireScript);
             connect(downloader, &GM_Downloader::finished, this, &GM_Script::reloadScript);

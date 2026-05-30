@@ -251,6 +251,10 @@ void NetworkManager::loadSettings()
     settings.endGroup();
     mApp->webProfile()->setHttpAcceptLanguage(AcceptLanguage::generateHeader(langs));
 
+    settings.beginGroup("Web-Browser-Settings");
+    m_clearRef = settings.value("ClearRef", false).toBool();
+    settings.endGroup();
+
     QNetworkProxy proxy;
     settings.beginGroup("Web-Proxy");
     const int proxyType = settings.value("ProxyType", 2).toInt();
@@ -294,6 +298,8 @@ QNetworkReply *NetworkManager::createRequest(QNetworkAccessManager::Operation op
         req.setRawHeader(QByteArrayLiteral("Accept"), mApp->userAgentManager()->globalUserAccept().toUtf8());
     if(!mApp->userAgentManager()->globalUserAcceptEnc().isNull())
         req.setRawHeader(QByteArrayLiteral("Accept-Encoding"), mApp->userAgentManager()->globalUserAcceptEnc().toUtf8());
+    if (m_clearRef)
+        req.setRawHeader(QByteArrayLiteral("Referer"),{});
     req.setHeader(QNetworkRequest::UserAgentHeader, mApp->userAgentManager()->globalUserAgent().toUtf8());
     req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
     return QNetworkAccessManager::createRequest(op, req, outgoingData);

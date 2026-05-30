@@ -140,6 +140,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
             menu.addSeparator();
             newAct = new QAction(tr("Delete All News"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                Q_UNUSED(b)
                 QMessageBox::StandardButton btn = QMessageBox::warning(this, tr("Confirmation"),
                     tr("Are you sure you want to delete all news?"), QMessageBox::Yes | QMessageBox::No);
                 if (btn != QMessageBox::Yes) return;
@@ -153,6 +154,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
         } else if(item->parent() == ui->tree1->topLevelItem(0)){
             newAct = new QAction(tr("Add New RSS Feed"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                Q_UNUSED(b)
                 QUrl url = QUrl(QInputDialog::getText(this, tr("Add new feed"), tr("Please enter URL of new feed:")));
                 if (url.isEmpty() || !url.isValid()) return;
 
@@ -182,6 +184,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
 
             newAct = new QAction(tr("Delete News in this Folder"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                Q_UNUSED(b)
                 QMessageBox::StandardButton btn = QMessageBox::warning(this, tr("Confirmation"),
                     tr("Are you sure you want to delete news?"), QMessageBox::Yes | QMessageBox::No);
                 if (btn != QMessageBox::Yes) return;
@@ -196,6 +199,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
 
             newAct = new QAction(tr("Toggle Enable/Disable Updates"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [&](bool b){
+                Q_UNUSED(b)
                 bool tmp = !selectValue(db, "active", "feed", "fid", item->data(0, rId)).toBool();
                 updateValue("feed", "active", tmp, "fid", item->data(0, rId));
                 for (int i =0; i < item->childCount(); i++){
@@ -207,6 +211,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
 
             newAct = new QAction(tr("Delete Folder"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                Q_UNUSED(b)
                 QMessageBox::StandardButton btn = QMessageBox::warning(this, tr("Confirmation"),
                     tr("Are you sure you want to delete folder?"), QMessageBox::Yes | QMessageBox::No);
                 if (btn != QMessageBox::Yes) return;
@@ -224,12 +229,14 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
         } else {
             newAct = new QAction(tr("Update Feed"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                Q_UNUSED(b)
                 beginToLoadSlot(QUrl(item->toolTip(0)));
             });
             menu.addAction(newAct);
 
             newAct = new QAction(tr("Delete News"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                Q_UNUSED(b)
                 QMessageBox::StandardButton btn = QMessageBox::warning(this, tr("Confirmation"),
                     tr("Are you sure you want to delete news?"), QMessageBox::Yes | QMessageBox::No);
                 if (btn != QMessageBox::Yes) return;
@@ -244,6 +251,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
 
             newAct = new QAction(tr("Toggle Enable/Disable Updates"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [&](bool b){
+                Q_UNUSED(b)
                 bool tmp = !selectValue(db, "active", "feed", "id", item->data(0, rId)).toBool();
                 updateValue("feed", "active", tmp, "id", item->data(0, rId));
                 tmp ? item->setForeground(0, QBrush(Qt::black)) :item->setForeground(0, QBrush(Qt::gray));
@@ -252,6 +260,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
 
             newAct = new QAction(tr("Copy link to clipboard"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                Q_UNUSED(b)
                 QClipboard *cb = QGuiApplication::clipboard();
                 cb->setText(item->toolTip(0));
             });
@@ -259,6 +268,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
 
             newAct = new QAction(tr("Reload All"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                Q_UNUSED(b)
                 updateValue("feed", "updated", QVariant(), "id", item->data(0, rId));
                 beginToLoadSlot(QUrl(item->toolTip(0)));
             });
@@ -268,6 +278,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
 
             newAct = new QAction(tr("Delete Feed"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                Q_UNUSED(b)
                 QMessageBox::StandardButton btn = QMessageBox::warning(this, tr("Confirmation"),
                     tr("Are you sure you want to delete feed?"), QMessageBox::Yes | QMessageBox::No);
                 if (btn != QMessageBox::Yes) return;
@@ -287,6 +298,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
     });
     connect(ui->tree1, QOverload<QTreeWidgetItem*, int>::of(&QTreeWidget::itemClicked),
             [this](QTreeWidgetItem *item, int col){
+        Q_UNUSED(col)
         if(item == ui->tree1->topLevelItem(0)){
             refreshTable();
         } else if(item->parent() == ui->tree1->topLevelItem(0)){
@@ -304,6 +316,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
     ui->table1->verticalHeader()->hide();
     connect(ui->table1, QOverload<const QPoint&>::of(&QTableWidget::customContextMenuRequested),
             [this](const QPoint& pos){
+        Q_UNUSED(pos)
         QMenu menu(this);
         QAction* newAct;
         QUrl link = selectValue(db, "url","item","id",ui->table1->item(ui->table1->currentRow(), 0)->data(rId)).toUrl();
@@ -311,6 +324,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
             menu.addAction(tr("Open link in new tab"), this, SLOT(loadFeedInNewTab()))->setData(link);
             newAct = new QAction(tr("Copy link to clipboard"), this);
             connect(newAct, QOverload<bool>::of(&QAction::triggered), [=](bool b){
+                Q_UNUSED(b)
                 QClipboard *cb = QGuiApplication::clipboard();
                 cb->setText(link.toString());
             });
@@ -318,6 +332,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
         }
         newAct = new QAction(tr("Delete"), this);
         connect(newAct, QOverload<bool>::of(&QAction::triggered), [this](bool b){
+            Q_UNUSED(b)
             int row = 0;
             const QList<QTableWidgetItem *> list = ui->table1->selectedItems();
             row = list[0]->row();
@@ -337,6 +352,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
     });
     connect(ui->table1, QOverload<QTableWidgetItem*, QTableWidgetItem*>::of(&QTableWidget::currentItemChanged),
             [this](QTableWidgetItem *item, QTableWidgetItem* item2){
+        Q_UNUSED(item2)
         ui->view1->setHtml("<html><body></body></html>", QUrl("http://_blank"));
         ui->view1->history()->clear();
         if (item == nullptr) return;
@@ -384,6 +400,7 @@ RSSManager::RSSManager(BrowserWindow* window, QWidget* p) : QWidget(p)
     });
     connect(ui->table1, QOverload<QTableWidgetItem*>::of(&QTableWidget::itemDoubleClicked),
             [this](QTableWidgetItem *item){
+        Q_UNUSED(item)
         QUrl link = selectValue(db, "url","item","id",ui->table1->item(ui->table1->currentRow(), 0)->data(rId)).toUrl();
         ui->view1->setHtml("<html><body></body></html>", QUrl("http://_blank"));
         ui->view1->history()->clear();
@@ -474,7 +491,6 @@ void RSSManager::refreshTree() {
 
     QSqlQuery query(db);
     query.exec("SELECT id, name FROM folder");
-    int i = 0;
     while (query.next()) {
         int id = query.value(0).toUInt();
         QString name = query.value(1).toString();

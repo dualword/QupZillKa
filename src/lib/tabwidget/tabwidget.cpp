@@ -1,4 +1,4 @@
-/* QupZillKa (2021-2025) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
+/* QupZillKa (2021-2026) https://github.com/dualword/QupZillKa License:GNU GPL v3*/
 /* ============================================================
 * QupZilla - Qt web browser
 * Copyright (C) 2010-2018 David Rosca <nowrep@gmail.com>
@@ -849,7 +849,7 @@ bool TabWidget::restoreState(const QVector<WebTab::SavedTab> &tabs, int currentT
         }
     }
 
-    for (const auto p : qAsConst(childTabs)) {
+    for (const auto &p : std::as_const(childTabs)) {
         const auto indices = p.second;
         for (int index : indices) {
             WebTab *t = weTab(index);

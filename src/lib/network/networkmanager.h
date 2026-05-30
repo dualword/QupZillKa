@@ -29,7 +29,7 @@ class NetworkUrlInterceptor;
 class ExtensionSchemeManager;
 class ExtensionSchemeHandler;
 
-class QUPZILLA_EXPORT NetworkManager : public QNetworkAccessManager
+class QUPZILLA_EXPORT NetworkManager final : public QNetworkAccessManager
 {
     Q_OBJECT
 
@@ -56,6 +56,7 @@ private:
     NetworkUrlInterceptor *m_urlInterceptor;
     ExtensionSchemeManager *m_extensionScheme;
     QHash<QString, QWebEngineCertificateError::Type> m_ignoredSslErrors;
+    bool m_clearRef;;
 };
 
 #endif // NETWORKMANAGER_H
